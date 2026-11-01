@@ -1,0 +1,16 @@
+# Formal-run clean-tree checker (spec 003 O2). INTERNAL USE ONLY: never distributed to
+# customers. Target: CPython 3.13 on Windows AMD64 only; other platforms are not established.
+# Each hash is the SHA-256 of the exact wheel named on its line, from PyPI (read 2026-11-01).
+# Install only after the dependency gates are approved, after requirements-dev.lock and
+# the editable project, without --no-deps so pip checks that every dependency is listed:
+#   python -m pip install --require-hashes --only-binary=:all: -r requirements-formal.lock
+#   python -m pip check
+# cffi-2.1.1-cp313-cp313-win_amd64.whl
+cffi==2.1.1 \
+    --hash=sha256:1aa5645c30469b09530c4ebca77ebf8f17618293c58f8549cb1a543a50236e7d
+# pycparser-3.12-py3-none-any.whl
+pycparser==3.12 \
+    --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e
+# pygit2-1.20.1-cp313-cp313-win_amd64.whl
+pygit2==1.20.1 \
+    --hash=sha256:5e4d6e37db59712e3f2148c33464536faf32bc863d283d97ebd280632ed5f138

@@ -1,0 +1,54 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+credentials*.json
+service-account*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Build outputs
+dist/
+build/
+frontend/dist/
+
+# Generated data (regenerate from code + seed, never commit)
+data/
+# ...but not the generator's own source package, which is also named data/
+!backend/src/dealpilot/data/
+*.parquet
+*.duckdb
+*.duckdb.wal
+evals/results/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Claude Code personal files
+CLAUDE.local.md
+.claude/settings.local.json

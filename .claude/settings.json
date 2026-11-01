@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "ask": [
+      "Bash(git commit)", "Bash(git commit *)", "PowerShell(git commit)", "PowerShell(git commit *)",
+      "Bash(git push)", "Bash(git push *)", "PowerShell(git push)", "PowerShell(git push *)",
+      "Bash(git remote add *)", "Bash(git remote remove *)", "Bash(git remote rm *)",
+      "Bash(git remote rename *)", "Bash(git remote set-url *)",
+      "PowerShell(git remote add *)", "PowerShell(git remote remove *)", "PowerShell(git remote rm *)",
+      "PowerShell(git remote rename *)", "PowerShell(git remote set-url *)",
+      "Bash(git reset)", "Bash(git reset *)", "PowerShell(git reset)", "PowerShell(git reset *)",
+      "Bash(git clean *)", "PowerShell(git clean *)",
+      "Bash(git rm *)", "PowerShell(git rm *)",
+      "Bash(pip install *)", "Bash(pip uninstall *)", "Bash(* -m pip install *)", "Bash(* -m pip uninstall *)",
+      "PowerShell(pip install *)", "PowerShell(pip uninstall *)",
+      "PowerShell(* -m pip install *)", "PowerShell(* -m pip uninstall *)",
+      "Bash(rm *)", "Bash(rmdir *)", "PowerShell(Remove-Item *)"
+    ],
+    "deny": [
+      "Read(.env)", "Read(.env.local)", "Read(.env.*.local)", "Read(.env.production)", "Read(.env.staging)", "Read(*.pem)", "Read(*.key)",
+      "Read(~/.claude/.credentials.json)", "Read(~/.ssh/**)",
+      "Edit(/data/raw/**)"
+    ]
+  }
+}

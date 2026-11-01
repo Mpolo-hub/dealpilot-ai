@@ -1,0 +1,14 @@
+# Store text with LF in the repo and check it out with LF on every OS
+* text=auto eol=lf
+
+# Windows scripts need CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary data, never touch line endings
+*.parquet binary
+*.duckdb binary
+*.png binary
+*.jpg binary
+*.ico binary

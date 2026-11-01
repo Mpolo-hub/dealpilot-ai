@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dealpilot"
+version = "0.1.0"
+requires-python = ">=3.13"
+# Ranges cover the versions the full suite passed on; exact versions are in
+# requirements-dev.lock. numpy is bounded because seeded random streams can change
+# between numpy versions, which changes generated data for the same seed.
+dependencies = [
+    "fastapi>=0.162,<1",
+    "uvicorn>=0.54,<1",  # ASGI server to run dealpilot.api.main:app
+    "duckdb>=2.0,<3",
+    "pyarrow>=26,<27",
+    "pandas>=3.1,<4",
+    "numpy>=2.5,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "httpx>=0.28,<1",  # required by fastapi.testclient.TestClient
+    "pytest-timeout",
+    "ruff==0.17.3",  # exact: default lint rules change between ruff releases
+]
+# Spec 003 O2 clean-tree checker for formal runs. INTERNAL USE ONLY: never shipped to
+# customers. Exact, hash-locked versions (Windows AMD64) are in requirements-formal.lock.
+formal = [
+    "pygit2==1.20.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# Plain `pytest` runs fast tests only. Slow tests (AC-10 multi-seed) run with:
+#   pytest -m slow
+# AC-FC-26 (spec 003 O2) needs the `formal` extra and its own authorization (O2 gate 6):
+#   DEALPILOT_RUN_AC_FC_26=o2-gate-6-approved, then pytest -m formal_checker
+# Without that exact value tests/conftest.py leaves them out of every run (spec 003 13.3).
+markers = [
+    "slow: multi-seed statistical tests (AC-10); run separately",
+    "formal_checker: AC-FC-26 clean-tree checker tests; need pygit2; run separately",
+]
+# A later -m on the command line overrides this one.
+addopts = '--tb=short -m "not slow and not formal_checker"'
+
+[tool.ruff]
+target-version = "py313"
+src = ["src", "tests"]
+line-length = 100
+
+[tool.ruff.lint]
+# Security rules (flake8-bandit, built into ruff) on top of ruff's defaults.
+extend-select = ["S"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests only: pytest uses assert (S101); subprocess runs the generator and git with fixed
+# argument lists, no shell (S603); test SQL embeds paths the tests created (S608).
+# Application code under src/ has no exemptions.
+"tests/**" = ["S101", "S603", "S608"]
