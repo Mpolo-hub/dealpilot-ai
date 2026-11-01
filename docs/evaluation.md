@@ -9,8 +9,13 @@ specification only. Question O2 (the formal-run clean-tree check) was officially
 2026-11-01 (spec D30, section 13.3). The closure does **not** authorize formal evaluation
 runs: they stay prohibited until the repository has a first commit, the working tree is
 verified clean, and every other condition of spec section 9.5 is met under its own
-authorization. The approval does not authorize implementation: building the forecasting
-module needs separate user authorization.
+authorization. The approval did not authorize implementation by itself: tranche 1 was
+built under its own authorization, and the harness (tranche 2: results record, holdout
+log, decision seed, run classes) was built on 2026-11-01 under the user's standing
+authorization for approved specs. Exploratory backtests run with
+`python -m dealpilot.forecasting.evaluate backtest` (from `backend/`). No formal run has
+been made: it needs a candidate model and every section 9.5 condition, under its own
+authorization.
 
 ## 1. Split by time, never at random
 - Train only on data up to and including the cutoff (the last training day). Test only on

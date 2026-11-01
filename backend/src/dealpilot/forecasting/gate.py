@@ -75,6 +75,13 @@ def fold_won(score: WindowScore) -> bool:
             and score.relmae is not None and score.relmae < 1)
 
 
+def holdout_condition(holdout: WindowScore | None) -> bool:
+    """Condition 4: holdout WAPE not worse and holdout RelMAE <= 1, both defined."""
+    return (holdout is not None and holdout.wape_candidate is not None
+            and holdout.wape_baseline is not None and holdout.relmae is not None
+            and holdout.wape_candidate <= holdout.wape_baseline and holdout.relmae <= 1)
+
+
 def level_verdict(scores: LevelScores) -> LevelVerdict:
     if len(scores.folds) != N_FOLDS:
         raise ForecastingError(f"the gate needs exactly {N_FOLDS} folds")
@@ -89,9 +96,7 @@ def level_verdict(scores: LevelScores) -> LevelVerdict:
         and 1 - w_c / w_b >= MIN_IMPROVEMENT,
         2: r is not None and r <= MAX_RELMAE,
         3: wins >= MIN_WINS,
-        4: holdout is not None and holdout.wape_candidate is not None
-        and holdout.wape_baseline is not None and holdout.relmae is not None
-        and holdout.wape_candidate <= holdout.wape_baseline and holdout.relmae <= 1,
+        4: holdout_condition(holdout),
     }
     return LevelVerdict(w_c, w_b, r, wins, conditions)
 

@@ -121,6 +121,13 @@ def test_security_repeated_values_are_bounded(client: TestClient) -> None:
     (".env.example", False),
     ("backend/src/dealpilot/data/generate.py", False),  # once hidden by the data/ rule
     ("backend/src/dealpilot/data/__init__.py", False),
+    # Spec 003 section 9.1: run folders, the lock and the head record stay local; the
+    # holdout log and the incident record are meant to be tracked.
+    ("evals/results/20260101T000000Z-backtest-0123abcd/run.json", True),
+    ("evals/results/holdout.lock", True),
+    ("evals/results/holdout-log.head", True),
+    ("evals/holdout-log.csv", False),
+    ("docs/incidents/holdout-integrity.md", False),
 ])
 def test_security_gitignore_rules(path: str, ignored: bool) -> None:
     """Generated data, secrets and venvs stay out of git; generator source stays in."""
@@ -152,3 +159,36 @@ def test_security_no_secrets_in_repository_files() -> None:
         found += [f"{name}: {label}" for label, pattern in SECRET_PATTERNS.items()
                   if pattern.search(text)]
     assert not found, found
+
+
+# --------------------------------------------------------------------------- harness inputs
+
+@pytest.mark.parametrize("damage", ["metadata-not-json", "metadata-list", "parquet-garbage",
+                                    "missing-file", "bad-dates"])
+def test_security_harness_rejects_damaged_data(tmp_path: Path, damage: str) -> None:
+    """Spec 003: a damaged data folder gives a ForecastingError naming files only, writes
+    no run folder and leaves the data folder byte-identical."""
+    from dealpilot.forecasting.evaluate import run_backtest
+    from dealpilot.forecasting.split import ForecastingError
+    from forecasting_support import folder_bytes, write_dataset
+
+    data = write_dataset(tmp_path / "data")
+    if damage == "metadata-not-json":
+        (data / "metadata.json").write_bytes(bytes([0xFF]) + b"{not json")
+    elif damage == "metadata-list":
+        (data / "metadata.json").write_text("[1, 2]", encoding="utf-8")
+    elif damage == "parquet-garbage":
+        (data / "orders.parquet").write_bytes(b"PAR1 not really parquet")
+    elif damage == "missing-file":
+        (data / "products.parquet").unlink()
+    else:
+        (data / "metadata.json").write_text(
+            '{"seed": 1, "start": "2023-01-01", "end": "2023-02-01", '
+            '"generator_version": "x", "row_counts": {}}', encoding="utf-8")
+    before = folder_bytes(data)
+    results = tmp_path / "results"
+    with pytest.raises(ForecastingError) as caught:
+        run_backtest(data, results, echo=lambda _: None)
+    assert str(tmp_path) not in str(caught.value)
+    assert not results.exists() or not any(results.iterdir())
+    assert folder_bytes(data) == before

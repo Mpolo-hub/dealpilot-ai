@@ -26,6 +26,8 @@ and forecasting on synthetic data.
 ## Layout
 - `specs/` numbered specs (`NNN-name.md`). The source of truth for behavior.
 - `docs/evaluation.md` rules every forecasting model must follow.
+- `docs/roadmap.md` implementation status per spec, blocked items and the decisions they
+  need. Keep it current after each change.
 - `backend/` holds `pyproject.toml`, `requirements-dev.lock`, the `dealpilot` package
   (`backend/src/dealpilot/`: `data`, `analytics`, `api`, `forecasting`, `ai`, and
   `insights`, which holds only the spec 005 D6 language rules for now) and the tests in

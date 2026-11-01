@@ -14,7 +14,7 @@ from statistics import median
 
 import numpy as np
 
-from dealpilot.forecasting.split import ForecastingError, date_range, is_open, open_mask
+from dealpilot.forecasting.split import ForecastingError, date_range, open_mask
 
 SCOPES = ("open", "all")
 
@@ -76,12 +76,14 @@ def mase_scale(train, start: date) -> float | None:
     (MASE_s is then null); so does a history with no usable pair (D25).
     """
     y = np.asarray(train, dtype=np.float64)
-    days = date_range(start, start + timedelta(days=len(y) - 1))
-    diffs = [abs(y[i] - y[i - 7]) for i in range(7, len(y))
-             if is_open(days[i]) and is_open(days[i - 7])]
-    if not diffs:
+    if len(y) <= 7:
         return None
-    scale = math.fsum(diffs) / len(diffs)
+    is_open_day = open_mask(date_range(start, start + timedelta(days=len(y) - 1)))
+    usable = is_open_day[7:] & is_open_day[:-7]
+    diffs = np.abs(y[7:] - y[:-7])[usable]
+    if diffs.size == 0:
+        return None
+    scale = math.fsum(diffs.tolist()) / diffs.size
     return None if scale == 0 else scale
 
 

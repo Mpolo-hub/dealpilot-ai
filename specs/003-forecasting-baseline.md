@@ -370,6 +370,11 @@ and `MASE_s` is `null` in the same way (D25). This cannot happen for the windows
 section 5.1, and MASE never affects the gate.
 MASE is reported (mean and median per level) but is never part of the acceptance gate.
 
+**Clarification (2026-11-01, D31).** For the holdout, scored as one 90-day window from four
+origins, `scale_s` uses training days from `start` to the holdout cutoff `H` only. Taking a
+later origin's cutoff would put holdout days into the scale, so `H` is the one choice that
+keeps every holdout observation out of it (no leakage, section 4). MASE stays report only.
+
 ### 7.3 RelMAE
 For a candidate and seasonal naive on the same window, day scope and series s:
 `MAE_c,s` and `MAE_b,s` are the mean absolute errors of the candidate and the baseline.
@@ -528,6 +533,23 @@ Holdout-stage files are written only after all four origins are scored.
 | `git_provenance` | Formal runs only: commit, `clean_tree`, the name and exact version of the clean-tree checker, and its libgit2 version (section 9.5) |
 | `signal_recovery` | `true` if computed, or `false` with a reason |
 
+**Clarifications (2026-11-01, D31).** The table above is unchanged; these notes record how
+the implementation reads it, as approved at the implementation review:
+- `source_manifest` covers every source file under `backend/src/` and `specs/` (plus the
+  three named files). Generated artifacts under `backend/src/`, namely `__pycache__`
+  folders and `*.egg-info` folders, are left out: they are build output, not source, and
+  they change between runs, which would break AC-FC-13. Every actual source file stays
+  covered.
+- `run.json` holds no run duration, because a duration differs between runs and AC-FC-13
+  allows only `run_id` and `created_at` to differ. The duration is printed on the console
+  and returned to the caller; a run over 60 seconds adds the section 9.7 warning to
+  `diagnostics`.
+- `metrics.csv` also has `n_folds_wape`, `n_folds_mae`, `n_folds_bias` and `n_folds_mase` on
+  the `mean` rows (section 7.5, "reported with the number of folds used").
+- RelMAE and its counters are also reported for naive against seasonal naive. They are
+  informational only and never used by the gate (section 8).
+- A holdout run's `run.json` also has `backtest_verification` (section 9.4, recomputation).
+
 ### 9.4 Holdout log (`evals/holdout-log.csv`)
 - **Append only.** The file is opened for appending, never truncated or rewritten.
 - **Columns:** `seq`, `timestamp_utc`, `event` (`started` or `completed`), `run_id`,
@@ -633,6 +655,22 @@ Holdout-stage files are written only after all four origins are scored.
 
   No holdout observation is loaded, parsed or scored before step 4 is durable. Any failure
   after step 4 (a hash mismatch in step 5, an error, a crash) consumes the holdout.
+
+  **Backtest recomputation (2026-11-01, D31).** The formal backtest pass checked in step 3
+  is read from that run's `run.json`, a local, gitignored file that anyone with access can
+  edit. So the holdout run also recomputes it. In step 3 it refuses (before `started`,
+  holdout not consumed) when the recorded run used other library versions than the current
+  ones or has no `metrics.csv`, since identical numbers are promised only on the same
+  machine with the same versions (section 9.6). In step 5, after parsing the hashed bytes
+  and before any holdout forecast, it recomputes the 13 backtest folds and compares the
+  gate values per level (conditions, means, wins) and the `metrics.csv` bytes with the
+  record. Any difference stops the run. The comparison can't run earlier: parsing the data
+  files loads holdout observations, which section 9.4 allows only after step 4 is
+  durable. So a mismatch, like any failure after step 4, consumes the holdout and keeps
+  the lock (integrity-failure rules below). Limits: this is a consistency check, not
+  cryptographic proof of trust. It shows that the recorded pass is what the current,
+  committed code computes on the hashed data. It does not protect against changes to that
+  code, and the log, head record and run records stay locally editable (Limits below).
 
   **Handled errors from step 4 onward keep the lock.** If writing or syncing the `started`
   entry or the head record fails without a crash (for example an `fsync` error), if the run
@@ -946,6 +984,7 @@ line).
 | D28 | AC-FC-26 type changes under the `o2-windows-v1` profile (section 13.3): a tracked entry can change type only when it is a symlink (mode 120000) or a gitlink (160000) entry, and the controller refuses both in phase A (K4 and the index reader), before pygit2 is loaded. This explicit refusal safely covers unsupported type changes and satisfies the type-changed requirement of AC-FC-26. An unsupported type change must never result in CLEAN. No cross-platform symlink support is required under the approved Windows compatibility profile. This does not change AC-FC-26, approve gates 3 to 6 or close O2. | Approved 2026-11-01 by the user's explicit decision, together with the acceptance of O2 gate 2. |
 | D29 | License acceptance for internal use (O2 gate 5) of pygit2 1.20.1, libgit2 1.9.7 (bundled in the pygit2 wheel), cffi 2.1.1 and pycparser 3.12, under six conditions: (1) internal use only; (2) no redistribution to customers; (3) no modification of these libraries; (4) applicable copyright and license notices are preserved; (5) the versions stay pinned (`backend/requirements-formal.lock`); (6) any redistribution or change of use requires a new license review. It does not authorize installation (gate 4) or running AC-FC-26 (gate 6), and does not close O2. | Accepted 2026-11-01 by the user's explicit decision (O2 gate 5). |
 | D30 | O2 closure record (2026-11-01). All six O2 gates are complete: plan (D27), implementation (D27, D28), dependency approval, installation (`pip check` clean), license (D29) and AC-FC-26 (56 passed, 0 failed, 0 skipped, 859 deselected) with `pygit2==1.20.1` and bundled `libgit2==1.9.7` verified at runtime. O2 is closed. D27, D28 and D29 stay as recorded, and the D29 license conditions remain applicable. The closure does not authorize any formal evaluation: a first Git commit and a verified clean working tree remain prerequisites (sections 9.5 and 13.3). | Approved 2026-11-01 by the user's explicit decision (official O2 closure). |
+| D31 | Implementation review of tranche 2 (D2 "exact options set at implementation review"). Approved choices: (1) the command line runs exploratory backtests and a read-only holdout status only; formal runs are Python calls; (2) `source_manifest` leaves out `__pycache__` and `*.egg-info` (section 9.3 clarification); (3) no run duration in `run.json` (console and `diagnostics` warning only); (4) `n_folds_*` columns on `mean` rows; (5) RelMAE for naive, informational only, never gated; (6) holdout MASE scale up to `H` (section 7.2 clarification); (7) one candidate per run, with the formal backtest pass recomputed from the hashed bytes and compared before any holdout forecast (section 9.4 clarification); (8) a backtest run creates its folder after scoring. No formula, threshold or gate rule changes. This approves no formal run. | Approved 2026-11-01 by the user's explicit decision; condition (7) set by the user. |
 | D5 | Replaced by D15 and D17. | Superseded |
 | D11 | Whether to serve `/v1/forecasts` (section 10), which also needs a spec 002 update. | Deferred |
 
