@@ -33,7 +33,8 @@ and forecasting on synthetic data.
   `insights`, which holds only the spec 005 D6 language rules for now) and the tests in
   `backend/tests/`.
 - `DealDesign/` holds UI design mockups (PNG).
-- `frontend/` does not exist yet.
+- `frontend/` holds the web frontend (spec 007, Implemented; React + Vite + TypeScript, exact npm
+  versions in `frontend/package-lock.json`). See `frontend/README.md` for commands.
 
 ## How we work
 1. Spec first. Approved specs in `specs/` are the source of truth for behavior. A spec's

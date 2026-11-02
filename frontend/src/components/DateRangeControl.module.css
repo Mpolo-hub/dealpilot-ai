@@ -1,0 +1,77 @@
+.range {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding: 6px 6px 6px var(--space-3);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-control);
+  box-shadow: var(--glass-inner), var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+}
+
+.icon {
+  display: inline-flex;
+  color: #4ea4ff;
+}
+
+.field {
+  display: inline-flex;
+}
+
+.input {
+  height: 32px;
+  padding: 0 var(--space-2);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color-scheme: dark;
+  font-variant-numeric: tabular-nums;
+}
+
+.input:hover {
+  border-color: var(--color-border-strong);
+}
+
+.dash {
+  color: var(--color-text-muted);
+}
+
+.apply,
+.reset {
+  height: 32px;
+  padding: 0 var(--space-4);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.apply {
+  border: 0;
+  background: var(--gradient-accent);
+  box-shadow: var(--glow-accent);
+  color: #fff;
+}
+
+.apply:hover {
+  filter: brightness(1.08);
+}
+
+.apply:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.reset {
+  border: 1px solid var(--color-border-strong);
+  background: rgba(8, 124, 255, 0.08);
+}
+
+.problem {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--color-red);
+}

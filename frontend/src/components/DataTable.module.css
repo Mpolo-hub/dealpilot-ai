@@ -1,0 +1,86 @@
+.wrap {
+  overflow-x: auto;
+  max-width: 100%;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-control);
+  background: rgba(3, 12, 26, 0.35);
+}
+
+.table {
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 0 var(--space-4);
+  height: 48px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--glass-edge);
+  white-space: nowrap; /* names, categories and amounts stay on one line */
+}
+
+.table th {
+  height: 42px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  background: linear-gradient(180deg, rgba(16, 48, 92, 0.55), rgba(9, 27, 54, 0.55));
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table tbody tr:hover {
+  background: rgba(8, 124, 255, 0.07);
+}
+
+.table .end {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.table .strong {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.table .muted {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sortButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: 600;
+  letter-spacing: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sortButton:hover {
+  color: var(--color-text);
+}
+
+.sortEnd {
+  flex-direction: row-reverse;
+}
+
+.arrow {
+  font-size: 10px;
+  color: var(--color-text-faint);
+}
+
+@media (max-width: 767px) {
+  .table th,
+  .table td {
+    padding: 0 var(--space-3);
+  }
+}

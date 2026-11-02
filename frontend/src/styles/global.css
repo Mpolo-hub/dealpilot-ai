@@ -1,0 +1,149 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Atmosphere: soft blue light fields and two thin flowing light arcs, drawn with CSS
+   gradients on fixed layers behind the app (no image, no effect on text). */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::before {
+  background:
+    radial-gradient(900px 560px at 18% -10%, rgba(8, 124, 255, 0.2), transparent 70%),
+    radial-gradient(760px 540px at 105% 28%, rgba(6, 59, 131, 0.35), transparent 70%),
+    radial-gradient(900px 600px at 60% 120%, rgba(8, 124, 255, 0.16), transparent 70%),
+    linear-gradient(180deg, var(--color-black-2) 0%, var(--color-black) 55%);
+}
+
+/* Light waves: thin bright bands with a soft halo, like light flowing over dark glass. */
+body::after {
+  background:
+    radial-gradient(ellipse 70% 60% at 62% -34%, transparent 62%, rgba(8, 124, 255, 0.5) 64.2%,
+      rgba(0, 200, 255, 0.35) 64.8%, rgba(8, 124, 255, 0.12) 66.5%, transparent 71%),
+    radial-gradient(ellipse 48% 70% at -16% 92%, transparent 61%, rgba(8, 124, 255, 0.45) 63.4%,
+      rgba(0, 200, 255, 0.28) 64%, rgba(8, 124, 255, 0.1) 66%, transparent 70%),
+    radial-gradient(ellipse 140% 50% at 60% 128%, transparent 64%, rgba(8, 124, 255, 0.38) 65.6%,
+      rgba(8, 124, 255, 0.1) 67.5%, transparent 71%);
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.chart-figure {
+  margin: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.table-note {
+  margin-top: var(--space-3);
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.table-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.table-name svg {
+  color: var(--color-primary);
+}
+
+.definition-list {
+  display: grid;
+  grid-template-columns: minmax(140px, max-content) 1fr;
+  gap: var(--space-3) var(--space-6);
+  margin: 0;
+}
+
+.definition-list dt {
+  color: var(--color-text-muted);
+}
+
+.definition-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.text-link {
+  color: #7fd6ff;
+}

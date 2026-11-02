@@ -1,0 +1,477 @@
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-6);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+
+.title {
+  font-size: 34px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  /* White, turning electric blue toward the end, as in the reference title. */
+  background: linear-gradient(90deg, #ffffff 0%, #ffffff 42%, #4a9dff 72%, #1a86ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.tabs {
+  display: inline-flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+  padding: 4px;
+  border-radius: var(--radius-control);
+  background: rgba(9, 27, 54, 0.5);
+  border: 1px solid var(--glass-edge);
+}
+
+.tab {
+  padding: 7px 16px;
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.tab:hover {
+  color: var(--color-text);
+  background: rgba(8, 124, 255, 0.1);
+}
+
+.tabActive,
+.tabActive:hover {
+  background: var(--gradient-accent);
+  color: #fff;
+  box-shadow: var(--glow-accent);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-inner), var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-card);
+  padding: var(--space-5);
+  min-width: 0;
+}
+
+/* Liquid-glass reflection: a fine light line along the top edge of each surface. */
+.card::before,
+.kpi::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: var(--glass-reflection);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+.cardTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.cardTitleIcon {
+  display: inline-flex;
+  color: var(--color-electric);
+  filter: drop-shadow(0 0 6px rgba(8, 124, 255, 0.5));
+}
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.kpi {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "icon label badge"
+    "icon value value"
+    "icon note note";
+  grid-template-rows: auto auto 1fr;
+  column-gap: 14px;
+  align-items: center;
+  position: relative;
+  background: var(--glass-corner), var(--glass-fill);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-inner), var(--glass-shadow), inset -1px -1px 0 rgba(8, 124, 255, 0.45);
+  backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-card);
+  padding: var(--space-4) var(--space-5);
+  min-width: 0;
+}
+
+.kpiIcon {
+  grid-area: icon;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  /* A solid, glossy electric-blue tile with a white icon (reference). */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, transparent 48%),
+    linear-gradient(150deg, #1f8fff 0%, var(--color-electric) 45%, #0a52c2 100%);
+  border: 1px solid rgba(120, 190, 255, 0.55);
+  box-shadow: 0 8px 20px -8px rgba(8, 124, 255, 0.85);
+  color: #ffffff;
+}
+
+.kpiLabel {
+  grid-area: label;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #e3ecf8;
+  /* A label is never cut: a long one (e.g. "Average revenue per day") wraps instead. */
+  overflow-wrap: break-word;
+}
+
+.kpiValue {
+  grid-area: value;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap; /* a number never breaks across lines */
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+
+.kpiNote {
+  grid-area: note;
+  align-self: start;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--color-text-faint);
+}
+
+.kpiBadge {
+  grid-area: badge;
+  justify-self: end;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Status badges: a dot plus a soft tint, distinct but restrained. */
+.status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.upcoming {
+  background: rgba(242, 181, 68, 0.12);
+  color: #f2c46b;
+  box-shadow: inset 0 0 0 1px rgba(242, 181, 68, 0.22);
+}
+
+.positive {
+  background: var(--color-green-soft);
+  color: var(--color-green);
+  box-shadow: inset 0 0 0 1px rgba(47, 224, 164, 0.22);
+}
+
+.negative {
+  background: var(--color-red-soft);
+  color: var(--color-red);
+  box-shadow: inset 0 0 0 1px rgba(255, 122, 138, 0.22);
+}
+
+.neutral {
+  background: var(--color-gray-soft);
+  color: var(--color-text-muted);
+  box-shadow: inset 0 0 0 1px rgba(143, 166, 196, 0.18);
+}
+
+.info {
+  background: var(--color-primary-soft);
+  color: #8cc2ff;
+  box-shadow: inset 0 0 0 1px rgba(8, 124, 255, 0.3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.control {
+  height: 40px;
+  width: 100%;
+  padding: 0 var(--space-3);
+  background: rgba(6, 20, 42, 0.7);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  box-shadow: var(--glass-inner);
+  min-width: 0;
+  color-scheme: dark;
+}
+
+.control:hover {
+  border-color: var(--edge-blue);
+}
+
+.control:focus-visible {
+  outline: none;
+  border-color: var(--color-electric);
+  box-shadow: 0 0 0 3px rgba(8, 124, 255, 0.25);
+}
+
+select.control {
+  cursor: pointer;
+}
+
+.searchField {
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  color: var(--color-text-faint);
+  display: inline-flex;
+  pointer-events: none;
+}
+
+.search {
+  padding-left: 36px;
+  width: 100%;
+}
+
+.filterRow {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) repeat(2, minmax(170px, 220px));
+  align-items: end;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.filterRow:has(> :nth-child(2):last-child) {
+  grid-template-columns: repeat(2, minmax(170px, 260px));
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.wide-narrow {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+.halves {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* A chart beside a table: the table gets more room so its five columns fit without
+   scrolling from 1280 px up (By region). */
+.chart-table {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 4fr);
+  align-items: start;
+}
+
+.skeleton {
+  border-radius: var(--radius-control);
+  background: linear-gradient(90deg, rgba(9, 27, 54, 0.6) 25%, rgba(16, 48, 92, 0.6) 50%,
+    rgba(9, 27, 54, 0.6) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.empty {
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.error {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  padding: var(--space-4);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: var(--radius-control);
+  background: var(--color-red-soft);
+}
+
+.errorTitle {
+  font-weight: 600;
+}
+
+.errorDetail {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.button {
+  height: 36px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--gradient-accent);
+  box-shadow: var(--glow-accent);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:hover {
+  filter: brightness(1.08);
+}
+
+.unavailable {
+  max-width: 640px;
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  position: relative;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-inner), var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-card);
+}
+
+@media (max-width: 1279px) {
+  .kpiRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wide-narrow,
+  .halves,
+  .chart-table {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .kpiRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .filterRow,
+  .filterRow:has(> :nth-child(2):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filterRow > .searchField {
+    grid-column: 1 / -1;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .card {
+    padding: var(--space-4);
+  }
+}
+
+.legendKey {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.legendSwatch {
+  fill: var(--color-electric);
+}
+
+.fieldInline {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.fieldInline .control {
+  width: auto;
+  height: 34px;
+  min-width: 96px;
+}
+
+.resultCount {
+  margin: 0 0 var(--space-3);
+  font-size: 13px;
+  color: var(--color-text-muted);
+}

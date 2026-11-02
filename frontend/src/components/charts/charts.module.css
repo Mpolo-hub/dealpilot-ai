@@ -1,0 +1,190 @@
+.box {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.svg {
+  display: block;
+  max-width: 100%;
+}
+
+.grid {
+  stroke: rgba(120, 170, 230, 0.09);
+  stroke-width: 1;
+}
+
+.axisY {
+  fill: var(--color-text-faint);
+  font-size: 11px;
+  text-anchor: end;
+  dominant-baseline: middle;
+}
+
+.axisX {
+  fill: var(--color-text-faint);
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.line {
+  fill: none;
+  stroke-width: 1.3;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 2px var(--light-blue-soft));
+}
+
+.area {
+  opacity: 1;
+}
+
+.guide {
+  stroke: var(--edge-blue);
+  stroke-dasharray: 3 3;
+}
+
+.dot {
+  fill: var(--color-electric);
+  stroke: #fff;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 5px var(--light-blue));
+}
+
+.tooltip {
+  fill: rgba(6, 21, 43, 0.94);
+  stroke: var(--edge-blue);
+}
+
+.tooltipLabel {
+  fill: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.tooltipValue {
+  fill: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Donut and legend form one group, centered in the card; if they must wrap, the lines
+   stay together (align-content: center) instead of spreading over the card height. */
+.donutLayout {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+}
+
+.donut {
+  flex: 0 0 auto;
+}
+
+.donutEmpty {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 24;
+}
+
+.segment {
+  stroke: #061428;
+  stroke-width: 2;
+}
+
+.segment:focus-visible,
+.bar:focus-visible,
+.column:focus-visible {
+  outline: none;
+  stroke: var(--color-focus);
+  stroke-width: 2;
+}
+
+.centerValue {
+  fill: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-anchor: middle;
+}
+
+.centerLabel {
+  fill: var(--color-text-muted);
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+  width: min(100%, 240px);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legendLabel {
+  flex: 1;
+}
+
+.legendValue {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.bar,
+.column {
+  fill: var(--color-primary);
+}
+
+.bar:hover,
+.column:hover {
+  fill: var(--color-bright);
+}
+
+.barLabel {
+  fill: var(--color-text-muted);
+  font-size: 12px;
+  text-anchor: end;
+  dominant-baseline: middle;
+}
+
+.barValue {
+  fill: var(--color-text);
+  font-size: 12px;
+  dominant-baseline: middle;
+}
+
+/* Daily sales: a height bounded by the viewport and the width, so the chart uses the
+   screen on desktop without stretching (no flex fill). About 430 px at an 860 px tall
+   window; never below 260 px or above 480 px. The svg is positioned so it never pushes
+   the box. */
+.lineBox {
+  position: relative;
+  width: 100%;
+  height: clamp(260px, min(100vh - 430px, 40vw), 480px);
+  overflow: hidden;
+}
+
+.lineBox > svg {
+  position: absolute;
+  inset: 0;
+}
+
+/* Donut finish: a fine luminous outer ring and a dark glass core behind the total. */
+.donutRing {
+  fill: none;
+  stroke: rgba(8, 124, 255, 0.22);
+  stroke-width: 1;
+}
+
+.donutCore {
+  fill: rgba(3, 12, 26, 0.75);
+  stroke: rgba(120, 190, 255, 0.12);
+}
