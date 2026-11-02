@@ -4,7 +4,7 @@ Engineering status of DealPilot AI, kept up to date as work lands. The specs in 
 stay the source of truth; this page only records where the implementation stands, what
 is blocked and why. "Tested" means the named tests pass; it never means production-ready.
 
-Last update: 2026-11-02 (release candidate RC1).
+Last update: 2026-11-02 (spec 002 Implemented).
 
 ## Baseline
 - First commit `85d0c23a009e9c1556ea015de2b842508cca8574` on `main` (96 files). No remote.
@@ -18,7 +18,7 @@ Last update: 2026-11-02 (release candidate RC1).
 | Spec | Status line | Implementation | Classification |
 |---|---|---|---|
 | 001 Synthetic sales data | Approved v3 | Generator `dealpilot.data.generate`; AC-01 to AC-17 | COMPLETED AND TESTED (AC-10 in the slow suite) |
-| 002 HTTP API v1 | Ready for implementation review (v3) | `dealpilot.api`; AC-API-01 to AC-API-17 | COMPLETED AND TESTED; the status line update needs the user's approval |
+| 002 HTTP API v1 | Implemented (2026-11-02) | `dealpilot.api`; AC-API-01 to AC-API-17 | COMPLETED AND TESTED |
 | 003 Forecasting baseline | Approved | Tranche 1 and tranche 2 (below) | IMPLEMENTED; exploratory runs validated; formal runs BLOCKED BY APPROVAL |
 | 004 AI provider layer | Approved | `dealpilot.ai` (mock, Meta adapter, P4) | COMPLETED AND TESTED offline; real Meta calls BLOCKED BY APPROVAL (Q1); P5 Draft, BLOCKED BY APPROVAL |
 | 005 Sales summary | Draft | Only the D6 language rules (`dealpilot.insights.language`, limited exception) | NOT IMPLEMENTED beyond D6; BLOCKED BY APPROVAL |
@@ -74,7 +74,7 @@ review).** None changes a formula, a threshold or the gate:
 | Real Meta calls, P5 | Spec 004 Q1 open; P5 Draft | Confirm A1 to A5; approve or reject P5 |
 | `/v1/forecasts` | Spec 003 D11 deferred; needs a spec 002 update | Approve D11 and the spec 002 change |
 | Frontend browser validation | Playwright browsers not authorized | Review of the F1 implementation; authorize the Playwright browser download for AC-UI-13, AC-UI-14 and end-to-end tests; approve spec 007 as a whole |
-| Spec 002 status line | Pre-lifecycle status kept until the user approves an update (`AGENTS.md`) | Approve `Implemented` (or `Approved`) |
+| Spec 002 status line | Resolved 2026-11-02: `Implemented` by the user's approval (commit `f06133b`) | None |
 | Spec 003 status line | Implemented and tested except formal runs | Approve `Implemented` if wanted |
 
 ### Notes on the design references (`DealDesign/`)
@@ -118,10 +118,10 @@ demonstration (closure record and commit record in `docs/release-candidate.md`; 
 defect fixed: the By region table scrolled between 1280 and about 1380 px). Decisions of
 2026-11-02: spec 007 approved and Implemented for the RC1 scope; npm advisory
 GHSA-g3hv-75wg-m249 accepted for the local development environment only (remediation
-required before public deployment); release commit authorized. Pending in a separate
-documentation change: spec 002 status `Implemented` (verified eligible: AC-API-01 to
-AC-API-17 tested and passing, no open question) and the spec 003 status line (currently
-`Approved`; formal forecasting runs stay restricted). Not a public or cloud release.
+required before public deployment); release commit authorized. Spec 002 marked
+`Implemented` the same day after verification (AC-API-01 to AC-API-17 tested and passing,
+no open question; commit `f06133b`). Spec 003 stays `Approved`; formal forecasting runs
+stay restricted. Not a public or cloud release.
 
 ## Next authorized work
 - Keep the default and slow suites green after each change.

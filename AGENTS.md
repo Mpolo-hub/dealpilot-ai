@@ -40,8 +40,8 @@ and forecasting on synthetic data.
 1. Spec first. Approved specs in `specs/` are the source of truth for behavior. A spec's
    `Status:` line follows `Draft -> Approved -> Implemented`. Implement only `Approved`
    specs, and change a status only with the user's explicit approval. Status lines written
-   before this lifecycle (spec 002: "Ready for implementation review") stay as they are
-   until the user approves an update.
+   before this lifecycle stay as they are until the user approves an update (spec 002, once
+   "Ready for implementation review", became `Implemented` on 2026-11-02).
    **Limited exception (2026-10-31, user's explicit authorization):** part of spec 005
    decision D6 is implemented in `dealpilot.insights.language` while spec 005 stays Draft:
    the English-only instruction, the local language check, and the rejection of
