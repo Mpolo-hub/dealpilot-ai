@@ -73,7 +73,7 @@ review).** None changes a formula, a threshold or the gate:
 | Real Gemini calls | Spec 006 gates G1 to G4 not verified; separate authorization | Operator checks (G3, G4), then an explicit authorization |
 | Real Meta calls, P5 | Spec 004 Q1 open; P5 Draft | Confirm A1 to A5; approve or reject P5 |
 | `/v1/forecasts` | Spec 003 D11 deferred; needs a spec 002 update | Approve D11 and the spec 002 change |
-| Frontend browser validation | Playwright browsers not authorized | Review of the F1 implementation; authorize the Playwright browser download for AC-UI-13, AC-UI-14 and end-to-end tests; approve spec 007 as a whole |
+| Frontend browser validation | Playwright browsers not authorized | Review of the F1 implementation; authorize the Playwright browser download for AC-UI-13, AC-UI-14 and end-to-end tests. No further approval of spec 007 is pending for the accepted RC1 scope: it is Implemented (2026-11-02) for the four RC1 modules (Dashboard, Sales analysis, Products, Data), local-only, read-only, seed 42 data; future features and production capabilities stay outside that approval |
 | Spec 002 status line | Resolved 2026-11-02: `Implemented` by the user's approval (commit `f06133b`) | None |
 | Spec 003 status line | Implemented and tested except formal runs | Approve `Implemented` if wanted |
 
