@@ -1,5 +1,5 @@
 // Shows an English error panel instead of a blank page if a page fails to render
-// (spec 007 FR-05). The shell keys it by path, so going to another page recovers.
+// (spec 007 section 5, common Error state). The shell keys it by path, so going to another page recovers.
 import { Component, type ReactNode } from "react";
 
 import { text } from "../text/en";

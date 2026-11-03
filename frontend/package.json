@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "DealPilot AI web frontend, first release (spec 007, Draft). Local use only.",
+  "description": "DealPilot AI web frontend, first release (spec 007, Implemented, RC1 scope). Local use only.",
   "engines": {
     "node": ">=24.15.0"
   },

@@ -1,6 +1,7 @@
 // Calendar helpers on ISO dates (YYYY-MM-DD), computed in UTC so the browser's time zone
 // never shifts a day. Closed days are the fixed business calendar of spec 001 section 5.7.
 import type { IsoDate } from "../api/types";
+import { text } from "../text/en";
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 86_400_000;
@@ -79,11 +80,9 @@ export function yearsBetween(start: IsoDate, end: IsoDate): number[] {
 export const minDate = (a: IsoDate, b: IsoDate): IsoDate => (a < b ? a : b);
 export const maxDate = (a: IsoDate, b: IsoDate): IsoDate => (a > b ? a : b);
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
-  "Dec"];
-
+/** Short month name from the text catalog: `Jan`. */
 export function monthLabel(iso: IsoDate): string {
-  return MONTHS[Number(iso.slice(5, 7)) - 1] ?? iso;
+  return text.formats.months[Number(iso.slice(5, 7)) - 1] ?? iso;
 }
 
 /** English date: `Jan 1, 2024`. */

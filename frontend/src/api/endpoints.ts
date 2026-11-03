@@ -1,8 +1,11 @@
-// The four spec 002 endpoints the first release uses (spec 007 section 8), as same-origin
-// paths. Nothing else is ever requested.
+// The four spec 002 endpoints the first release uses (spec 007 sections 3.1 and 4), as
+// same-origin paths. Nothing else is ever requested, except the two Stage 1 access paths
+// in public demo mode (spec 014 JA-FR-05 and JA-FR-08).
 import { buildQuery } from "./client";
 import type { MetricsQuery } from "./types";
 
+export const ACCESS_REDEEM = "/access/redeem";
+export const ACCESS_LOGOUT = "/access/logout";
 export const HEALTH = "/health";
 export const METADATA = "/v1/metadata";
 export const DIMENSIONS = "/v1/dimensions";

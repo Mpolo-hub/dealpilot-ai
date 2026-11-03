@@ -1,5 +1,6 @@
 // One fetch wrapper for the spec 002 API. Requests always go to the page's own origin
 // (spec 007 D9: the Vite proxy forwards `/v1` and `/health`), so the API needs no CORS.
+import { notifySessionEnded } from "./session";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -41,8 +42,15 @@ function errorFrom(status: number, body: unknown): ApiError {
   return new ApiError(status, code, message);
 }
 
+function assertSameOrigin(path: string): void {
+  // "//host/..." would leave the page's origin, so it is refused too.
+  if (!path.startsWith("/") || path.startsWith("//")) {
+    throw new Error("API paths must be same-origin paths");
+  }
+}
+
 export async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
-  if (!path.startsWith("/")) throw new Error("API paths must be same-origin paths");
+  assertSameOrigin(path);
   let response: Response;
   try {
     response = await fetch(path, { signal, headers: { Accept: "application/json" } });
@@ -57,9 +65,35 @@ export async function getJson<T>(path: string, signal?: AbortSignal): Promise<T>
     body = null;
   }
   if (!response.ok) {
+    // Stage 1 public demo (A7-H1, S1-b): no valid session any more.
+    if (response.status === 401 && path.startsWith("/v1/")) notifySessionEnded();
     // A proxy with no API behind it answers 5xx without the spec 002 body.
     if (body === null && response.status >= 500) throw new NetworkError();
     throw errorFrom(response.status, body);
   }
   return body as T;
+}
+
+/** POST a JSON body to a same-origin path (Stage 1 `/access/redeem` and `/access/logout`). */
+export async function postJson(path: string, body: unknown): Promise<void> {
+  assertSameOrigin(path);
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new NetworkError();
+  }
+  if (response.ok) return;
+  let parsed: unknown;
+  try {
+    parsed = await response.json();
+  } catch {
+    parsed = null;
+  }
+  throw errorFrom(response.status, parsed);
 }

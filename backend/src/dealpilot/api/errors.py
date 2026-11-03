@@ -21,6 +21,8 @@ DATA_UNAVAILABLE_MESSAGE = (
     "`backend\\.venv\\Scripts\\python.exe -m dealpilot.data.generate --out data/raw`, "
     f"or set {ENV_VAR} to a folder made by the generator."
 )
+# Public demo mode (spec 014, S1-D15): no local command, path or detail is shown.
+PUBLIC_DATA_UNAVAILABLE_MESSAGE = "The demo data is temporarily unavailable."
 _HTTP_CODES = {404: ("not_found", "No such route."),
                405: ("method_not_allowed", "This route does not support this method.")}
 
@@ -50,13 +52,15 @@ def is_v1(request: Request) -> bool:
     return path == "/v1" or path.startswith("/v1/")
 
 
-def install_error_handlers(app: FastAPI) -> None:
+def install_error_handlers(app: FastAPI, public: bool = False) -> None:
     @app.exception_handler(APIError)
     async def api_error(request: Request, exc: APIError) -> JSONResponse:
         return error_response(exc.status_code, exc.code, exc.message, exc.details)
 
     @app.exception_handler(DataUnavailable)
     async def data_unavailable(request: Request, exc: DataUnavailable) -> JSONResponse:
+        if public:
+            return error_response(503, "data_unavailable", PUBLIC_DATA_UNAVAILABLE_MESSAGE)
         details = [detail(ENV_VAR, exc.configured, reason) for reason in exc.reasons]
         return error_response(503, "data_unavailable", DATA_UNAVAILABLE_MESSAGE, details)
 

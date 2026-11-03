@@ -398,6 +398,14 @@ select.control {
   filter: brightness(1.08);
 }
 
+.demoNotice {
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  font-size: 13px;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--glass-edge);
+}
+
 .unavailable {
   max-width: 640px;
   display: grid;

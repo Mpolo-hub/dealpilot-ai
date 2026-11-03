@@ -3,10 +3,15 @@
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 
+import { postJson } from "../api/client";
+import { ACCESS_LOGOUT } from "../api/endpoints";
+import { notifySessionEnded } from "../api/session";
+import { isPublicDemo } from "../demo";
 import { text } from "../text/en";
 import styles from "./AppShell.module.css";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { Icon, type IconName } from "./Icons";
+import { DemoNotice } from "./ui";
 
 const NAV: { to: string; label: string; icon: IconName }[] = [
   { to: "/", label: text.nav.dashboard, icon: "dashboard" },
@@ -24,6 +29,14 @@ export function AppShell() {
     setLastPath(location.pathname);
     setOpen(false);
   }
+  const publicDemo = isPublicDemo();
+  const [signingOut, setSigningOut] = useState(false);
+
+  // S1-c: logout, then the signed-out page. A failed call still ends the session here.
+  const signOut = () => {
+    setSigningOut(true);
+    postJson(ACCESS_LOGOUT, {}).catch(() => undefined).finally(notifySessionEnded);
+  };
 
   return (
     <div className={styles.shell}>
@@ -49,14 +62,21 @@ export function AppShell() {
       </aside>
       {open && <div className={styles.backdrop} onClick={() => setOpen(false)} aria-hidden="true" />}
       <div className={styles.body}>
-        <header className={styles.topbar}>
+        <header className={`${styles.topbar} ${publicDemo ? styles.topbarPublic : ""}`}>
           <button type="button" className={styles.menuButton} aria-expanded={open}
             aria-controls="main-navigation" onClick={() => setOpen(!open)}>
             <Icon name={open ? "close" : "menu"} size={20} />
             <span className="visually-hidden">{open ? text.app.closeMenu : text.app.menu}</span>
           </button>
           <span className={styles.topbarBrand}>{text.app.name}</span>
+          {publicDemo && (
+            <button type="button" className={styles.signOut} disabled={signingOut}
+              onClick={signOut}>
+              {text.access.signOut}
+            </button>
+          )}
         </header>
+        {publicDemo && <DemoNotice />}
         <main id="main" className={styles.main} tabIndex={-1}>
           <ErrorBoundary key={location.pathname}>
             <Outlet />

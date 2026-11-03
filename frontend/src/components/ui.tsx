@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Link, useLocation, useSearchParams } from "react-router";
 
 import { errorMessage } from "../api/errors";
+import { isPublicDemo } from "../demo";
 import { text } from "../text/en";
 import { Icon, type IconName } from "./Icons";
 import styles from "./ui.module.css";
@@ -198,13 +199,20 @@ export function ErrorPanel({ error, onRetry }: { error: unknown; onRetry?: () =>
 }
 
 export function DataUnavailable() {
+  // Public demo (S1-D15): a neutral message, no local command.
+  const publicDemo = isPublicDemo();
   return (
     <div className={styles.unavailable} role="alert">
       <h1 className={styles.title}>{text.errors.dataUnavailableTitle}</h1>
-      <p>{text.errors.dataUnavailable}</p>
-      <p className={styles.subtitle}>{text.errors.dataUnavailableHelp}</p>
+      <p>{publicDemo ? text.errors.demoDataUnavailable : text.errors.dataUnavailable}</p>
+      {!publicDemo && <p className={styles.subtitle}>{text.errors.dataUnavailableHelp}</p>}
     </div>
   );
+}
+
+/** Stage 1 demo notice (A7-H1, S1-d): one permanent line, public demo mode only. */
+export function DemoNotice() {
+  return <p className={styles.demoNotice} role="note">{text.access.demoNotice}</p>;
 }
 
 /** A legend entry: a colored line and its label (reference: "Actual sales"). */

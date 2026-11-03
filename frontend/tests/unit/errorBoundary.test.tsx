@@ -1,4 +1,5 @@
-// A page that fails to render shows an English panel, never a blank page (spec 007 FR-05).
+// A page that fails to render shows an English panel, never a blank page (spec 007 section 5,
+// common Error state).
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 

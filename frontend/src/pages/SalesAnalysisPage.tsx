@@ -109,7 +109,7 @@ function Overview({ dims, range, dataset }: { dims: Dimensions; range: Range; da
       <Grid variant="halves">
         <Card title={t.topProducts} icon="trophy">
           <Loaded state={byProduct} retry={retryProducts} height={280}>
-            {(m) => m.rows.length === 0 ? <EmptyState /> : (
+            {(m) => m.totals.units === 0 ? <EmptyState /> : (
               <HorizontalBarChart title={t.topProducts} valueHeader={t.revenue}
                 data={[...m.rows].sort(byRevenue((r) => r.product_id ?? "")).slice(0, 10).map((r) => ({
                   label: r.product_id ?? "", value: toDollars(r.revenue),
@@ -134,6 +134,7 @@ function MonthlyChart({ state, retry, range }: { state: ApiState<SalesMetrics>; 
   return (
     <Loaded state={state} retry={retry} height={240}>
       {(m) => {
+        if (m.totals.units === 0) return <EmptyState />;
         const months = eachMonth(range.start, range.end);
         const series = fillBuckets(months, m.rows, (row: { revenue: string }) => toDollars(row.revenue));
         return (

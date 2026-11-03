@@ -2,6 +2,7 @@
 // they become integer cents (BigInt, exact) for comparisons and are turned into floating
 // numbers only to divide for display (shares, averages, percent changes).
 import type { Money } from "../api/types";
+import { text } from "../text/en";
 
 const MONEY = /^[0-9]+\.[0-9]{2}$/;
 
@@ -20,25 +21,32 @@ export function toDollars(value: Money): number {
   return Number(toCents(value)) / 100;
 }
 
-const exact = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+// Every API amount is in USD (spec 002 section 3.3; spec 007 D5). This is data, not
+// language, so it is not in the text catalog; the symbol is derived from it, never typed.
+const CURRENCY = "USD";
+const { locale, compactSuffixes } = text.formats;
+const exact = new Intl.NumberFormat(locale, { style: "currency", currency: CURRENCY });
+const currencySymbol = exact.formatToParts(0).find((part) => part.type === "currency")?.value ?? CURRENCY;
 
 /** Exact amount with cents, for tooltips and tables: `$2,026,466.37`. */
 export function formatMoney(value: Money): string {
   const cents = toCents(value);
   const dollars = cents / 100n;
   const rest = (cents % 100n).toString().padStart(2, "0");
-  return `$${dollars.toLocaleString("en-US")}.${rest}`;
+  return `${currencySymbol}${dollars.toLocaleString(locale)}.${rest}`;
 }
 
 /** Short amount for cards and axes: `$12.5M`, `$482K`, `$950`. */
 export function formatMoneyCompact(dollars: number): string {
   const abs = Math.abs(dollars);
-  const units: [number, string][] = [[1e9, "B"], [1e6, "M"], [1e3, "K"]];
+  const units: [number, string][] = [
+    [1e9, compactSuffixes.billion], [1e6, compactSuffixes.million], [1e3, compactSuffixes.thousand],
+  ];
   for (const [size, suffix] of units) {
     if (abs >= size) {
       const scaled = dollars / size;
       const digits = Math.abs(scaled) >= 100 ? 0 : 1;
-      return `$${scaled.toFixed(digits).replace(/\.0$/, "")}${suffix}`;
+      return `${currencySymbol}${scaled.toFixed(digits).replace(/\.0$/, "")}${suffix}`;
     }
   }
   return exact.format(Math.round(dollars)).replace(/\.00$/, "");

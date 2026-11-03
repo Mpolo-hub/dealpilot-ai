@@ -1,0 +1,28 @@
+# Render Blueprint for the DealPilot AI Stage 1 hackathon demo (spec 014; S1-D09 and
+# S1-D17 amended 2026-11-03: Render free web service, no persistent disk).
+# Secrets marked `sync: false` are entered in the Render dashboard, never committed.
+services:
+  - type: web
+    name: dealpilot-ai-demo
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: false
+    envVars:
+      - key: DEALPILOT_DEMO_MODE
+        value: public
+      - key: DEALPILOT_DEMO_EPHEMERAL_STORE
+        value: "1"
+      - key: DEALPILOT_DEMO_CLIENT_IP_HEADER
+        value: CF-Connecting-IP
+      - key: DEALPILOT_DEMO_END
+        value: "2026-12-04T23:59:59+01:00"
+      - key: DEALPILOT_DEMO_HASH_KEY
+        generateValue: true
+      - key: DEALPILOT_DEMO_ORIGIN
+        sync: false
+      - key: DEALPILOT_DEMO_INVITES
+        sync: false

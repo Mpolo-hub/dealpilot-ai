@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { text } from "../../src/text/en";
-import { DIMENSIONS, errorResponse, installFakeApi, LINES, METADATA } from "../fakeApi";
+import { DIMENSIONS, errorResponse, installFakeApi, LINES, METADATA, metrics } from "../fakeApi";
 import { currentLocation, renderAt } from "../render";
 
 const sumCents = (filter: (l: (typeof LINES)[number]) => boolean = () => true) =>
@@ -276,6 +276,50 @@ describe("errors and states", () => {
     renderAt("/?start=2023-01-01&end=2023-01-31");
     const daily = await card(text.dashboard.dailySales);
     await within(daily).findByText(text.common.noSales);
+  });
+
+  it("section 5 empty rule: Sales by month shows the empty state when its totals.units is 0", async () => {
+    // The monthly call answers for a window without sales: rows [] and totals.units 0.
+    installFakeApi((url) => {
+      if (url.searchParams.get("interval") !== "month") return undefined;
+      const empty = new URL(url);
+      empty.searchParams.set("start", "2023-01-01");
+      empty.searchParams.set("end", "2023-01-31");
+      return metrics(empty);
+    });
+    renderAt("/analysis");
+    const monthly = await card(text.analysis.salesByMonth);
+    await within(monthly).findByText(text.common.noSales);
+    expect(within(monthly).queryByText(`${text.common.chartDescription}: ${text.analysis.salesByMonth}`))
+      .toBeNull();
+  });
+
+  it("Sales by month follows its own (year) response, not the page range (sections 5 and 5.2)", async () => {
+    // The page range (January 2023) has no sales, but the chart plots the chosen year
+    // (2023 here), which does: the chart is drawn, not the empty state.
+    installFakeApi();
+    renderAt("/analysis?start=2023-01-01&end=2023-01-31");
+    const monthly = await card(text.analysis.salesByMonth);
+    await within(monthly).findByText(`${text.common.chartDescription}: ${text.analysis.salesByMonth}`);
+    expect(within(monthly).queryByText(text.common.noSales)).toBeNull();
+  });
+
+  it("section 5 empty rule: the top 10 chart follows totals.units, not the row count", async () => {
+    // Defensive check of the literal section 5 rule. Under the API contract (spec 002 D5:
+    // only groups with sales are returned) rows are empty exactly when totals.units is 0,
+    // so this fixture with a zero-unit row is not a response a conforming API sends.
+    const zero = { units: 0, revenue: "0.00", orders: 0, order_lines: 0 };
+    installFakeApi((url) => url.searchParams.get("group_by") === "product"
+      ? Response.json({ start: DIMENSIONS.date_range.start, end: DIMENSIONS.date_range.end,
+        group_by: ["product"], interval: null, filters: { product_id: [], category: [], region_id: [] },
+        metrics: ["units", "revenue", "orders", "order_lines"],
+        rows: [{ product_id: "P001", ...zero }], totals: zero, row_count: 1 })
+      : undefined);
+    renderAt("/analysis");
+    const top = await card(text.analysis.topProducts);
+    await within(top).findByText(text.common.noSales);
+    expect(within(top).queryByText(`${text.common.chartDescription}: ${text.analysis.topProducts}`))
+      .toBeNull();
   });
 });
 

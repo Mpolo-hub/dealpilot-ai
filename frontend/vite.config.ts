@@ -11,6 +11,9 @@ const API = "http://127.0.0.1:8000";
 const proxy = {
   "/v1": { target: API, changeOrigin: false },
   "/health": { target: API, changeOrigin: false },
+  // Stage 1 access calls only; `/access` itself is an SPA route (spec 014, A7-H1).
+  "/access/redeem": { target: API, changeOrigin: false },
+  "/access/logout": { target: API, changeOrigin: false },
 };
 
 // Content Security Policy of the built app (section 11). The dev server is left without

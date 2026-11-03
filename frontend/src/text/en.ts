@@ -1,7 +1,21 @@
-// Every user-facing string of the first release (spec 007 section 8, D8). English only
-// (AGENTS.md permanent product rule). Tests scan this module and the rendered pages.
+// Every user-facing string of the first release (spec 007 section 8, D8), plus the month
+// names, the locale tag and the compact suffixes K, M and B. Some format parts are still
+// written in code, not here: the percent sign (components/ui.tsx, charts/DonutChart.tsx),
+// the date pattern `Jan 1, 2024` (domain/dates.ts), and the decimal point and symbol
+// position of amounts (domain/money.ts, where the USD currency also lives as data). They
+// stay there until an approved spec moves them. The RC1 output stays English until an
+// approved spec changes it (AGENTS.md, Application output language). Tests scan this
+// module and the rendered pages.
 
 export const text = {
+  formats: {
+    // English formats of spec 007 section 8: `$12.5M`, `$482K`, `152,840`, `Jan 1, 2024`.
+    // The currency is a property of the data, not of the language: it lives in
+    // domain/money.ts (spec 002 section 3.3), and its symbol is derived from it.
+    locale: "en-US",
+    compactSuffixes: { thousand: "K", million: "M", billion: "B" },
+    months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  },
   app: {
     name: "DealPilot AI",
     skipToContent: "Skip to content",
@@ -55,6 +69,18 @@ export const text = {
     networkHelp:
       "Start it from backend/ with: .venv\\Scripts\\python.exe -m uvicorn dealpilot.api.main:app --host 127.0.0.1 --port 8000",
     apiDetail: "Details from the API",
+    // Stage 1 public demo (spec 014 section 5, S1-D15).
+    rateLimited: "Too many requests, try again in a minute.",
+    demoDataUnavailable: "The demo data is temporarily unavailable.",
+  },
+  // Stage 1 public demo screens (spec 014 section 5, spec 007 A7-H1 D15-H1).
+  access: {
+    opening: "Opening the DealPilot AI demo...",
+    invalidLink: "This link is not valid or has expired.",
+    signedOut:
+      "Your demo session has ended. Open your invitation link again, or ask the organizer for a new one.",
+    signOut: "Sign out",
+    demoNotice: "Hackathon demo. Synthetic data (seed 42). Not a commercial product.",
   },
   notFound: {
     title: "Page not found",

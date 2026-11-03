@@ -7,4 +7,5 @@ afterEach(() => {
   cleanup();
   clearApiCache();
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });

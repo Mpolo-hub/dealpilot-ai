@@ -5,13 +5,15 @@ import { describe, expect, it } from "vitest";
 import type { Product } from "../../src/api/types";
 import {
   addDays, daysInclusive, eachDay, eachMonth, fillBuckets, formatDate, isIsoDate, isOpenDay,
-  oneYearEarlier, openDays,
+  monthLabel, oneYearEarlier, openDays,
 } from "../../src/domain/dates";
 import { formatCount } from "../../src/domain/format";
 import {
   compareMoney, formatMoney, formatMoneyCompact, moneyChange, moneyShare, toCents, toDollars,
 } from "../../src/domain/money";
 import { averageRevenuePerOpenDay, comparisonRange, productStatus } from "../../src/domain/rules";
+import { monthTicks } from "../../src/pages/pageState";
+import { text } from "../../src/text/en";
 
 describe("money (FR-02)", () => {
   it("keeps exact cents from the API string", () => {
@@ -110,5 +112,47 @@ describe("D5: average revenue per open day", () => {
     // 2024-12-20 to 2025-01-05: 15 open days.
     expect(averageRevenuePerOpenDay("1500.00", "2024-12-20", "2025-01-05")).toBe(100);
     expect(averageRevenuePerOpenDay("10.00", "2024-12-25", "2024-12-25")).toBeNull();
+  });
+});
+
+// R-02 (AC-UI-11): month names and number formats have one source, `text/en.ts`. The
+// visible output stays the same English text as before. The currency is data (spec 002
+// section 3.3) and is named once, in domain/money.ts.
+const SOURCES = import.meta.glob(["../../src/**/*.{ts,tsx}", "!../../src/text/en.ts"],
+  { query: "?raw", import: "default", eager: true }) as Record<string, string>;
+// SVG path commands ("M", "L") in components/charts are not compact suffixes, so the
+// suffix rule applies only to the modules that format amounts.
+const FORMATTING = /\/src\/(domain|pages)\//;
+
+describe("formats come from text/en.ts (AC-UI-11)", () => {
+  it("no month name, locale tag, currency or compact suffix is written outside the catalog", () => {
+    expect(Object.keys(SOURCES).some((path) => path.includes("/src/components/"))).toBe(true);
+    for (const [path, source] of Object.entries(SOURCES)) {
+      expect(source, path).not.toMatch(/["'](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)["']/);
+      expect(source, path).not.toMatch(/["']en-US["']/);
+      expect(source, path).not.toMatch(/toLocaleString\(\)/);
+      expect(source, path).not.toMatch(/`\$\$\{/);
+      if (!path.endsWith("/src/domain/money.ts")) expect(source, path).not.toMatch(/["']USD["']/);
+      if (FORMATTING.test(path)) expect(source, path).not.toMatch(/["'][KMB]["']/);
+    }
+  });
+
+  it("the catalog holds the same English formats as before", () => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    expect([...text.formats.months]).toEqual(months);
+    expect(months.map((_, i) => monthLabel(`2024-${String(i + 1).padStart(2, "0")}-01`))).toEqual(months);
+    expect(text.formats.locale).toBe("en-US");
+    expect(text.formats).not.toHaveProperty("currency");
+    expect(text.formats.compactSuffixes).toEqual({ thousand: "K", million: "M", billion: "B" });
+    // The symbol comes from the USD currency code, on both the compact and the exact paths.
+    expect(formatMoneyCompact(2_500_000_000)).toBe("$2.5B");
+    expect(formatMoneyCompact(482_000)).toBe("$482K");
+    expect(formatMoneyCompact(950)).toBe("$950");
+    expect(formatMoney("2026466.37")).toBe("$2,026,466.37");
+    // Negative compact amounts never occur in RC1 (revenue, averages and axes are >= 0), and
+    // spec 007 defines no negative money format, so no negative form is asserted here.
+    expect(formatMoneyCompact(12.4)).toBe("$12");
+    expect(monthTicks(["2023-12-31", "2024-01-01", "2024-01-02", "2024-02-01"]))
+      .toEqual([{ index: 1, label: "Jan 2024" }, { index: 3, label: "Feb 2024" }]);
   });
 });

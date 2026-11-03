@@ -1,0 +1,17 @@
+.git
+.claude
+**/.venv
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/*.egg-info
+data
+frontend/dist
+backend/data
+evals
+.env
+.env.*
+*.pem
+*.key
+DealDesign

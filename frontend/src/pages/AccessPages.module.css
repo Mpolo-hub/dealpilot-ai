@@ -1,0 +1,15 @@
+/* Stage 1 access and signed-out pages: one centered panel, no shell. */
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  outline: none;
+}

@@ -144,6 +144,28 @@
   outline: none;
 }
 
+/* Stage 1 public demo (A7-H1, S1-c): the top bar holds the sign-out button at every width. */
+.topbar.topbarPublic {
+  display: flex;
+}
+
+.signOut {
+  margin-left: auto;
+  height: 36px;
+  padding: 0 var(--space-4);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.signOut:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
 .backdrop {
   display: none;
 }
