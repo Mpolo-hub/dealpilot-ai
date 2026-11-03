@@ -117,26 +117,62 @@ def install(app: FastAPI, config: DemoConfig, clock=time.time) -> None:
         return (content_type == "application/json"
                 and request.headers.get("origin", "").rstrip("/") == config.origin)
 
-    async def _body_too_large(request: Request) -> bool:
+    async def _read_capped(request: Request) -> bytes | None:
+        """The body, or None as soon as it exceeds MAX_BODY (HIGH-1: never buffer more).
+
+        A declared Content-Length over the limit is refused without reading. Otherwise the
+        stream (also chunked bodies with no Content-Length) is read piece by piece and
+        reading stops at the first byte past the limit.
+        """
         declared = request.headers.get("content-length")
         if declared is not None and (not declared.isdigit() or int(declared) > MAX_BODY):
-            return True
-        return len(await request.body()) > MAX_BODY
+            return None
+        body = bytearray()
+        async for chunk in request.stream():
+            body.extend(chunk)
+            if len(body) > MAX_BODY:
+                return None
+        return bytes(body)
 
-    async def _json_body(request: Request) -> dict | None:
+    def _parse_json(body: bytes) -> dict | None:
         try:
-            data = json.loads(await request.body() or b"{}")
+            data = json.loads(body or b"{}")
         except ValueError:
             return None
         return data if isinstance(data, dict) else None
+
+    def _redeem_ip_blocked(conn: sqlite3.Connection, key: str, moment: int) -> bool:
+        """Read-only pre-check of the per-IP redeem limits, before any body is read.
+
+        It does not count the attempt (store.redeem counts it), so the limits stay the
+        approved ones (JA-SR-04): blocked when a window is already at its limit.
+        """
+        for scope, window, limit in store.REDEEM_IP:
+            row = conn.execute(
+                "SELECT count FROM rate_counters WHERE scope=? AND subject_key=? "
+                "AND window_seconds=? AND window_start=?",
+                (scope, key, window, moment - moment % window)).fetchone()
+            if row is not None and row[0] >= limit:
+                return True
+        return False
 
     @app.post("/access/redeem", include_in_schema=False)
     async def redeem(request: Request) -> Response:
         if not _csrf_ok(request):
             return _error(403, "forbidden", "Request refused.")
-        if await _body_too_large(request):
+        try:
+            blocked = await run_in_threadpool(_store_call, config, _redeem_ip_blocked,
+                                              request.state.client_key, now())
+        except (store.StoreError, sqlite3.Error):
+            log.warning("store_unavailable path=/access/redeem")
+            return _error(503, "service_unavailable", UNAVAILABLE)
+        if blocked:
+            log.info("redeem_rate_limited")
+            return _error(429, "rate_limited", "Too many requests, try again in a minute.")
+        body = await _read_capped(request)
+        if body is None:
             return _error(413, "payload_too_large", "Request refused.")
-        data = await _json_body(request)
+        data = _parse_json(body)
         token = data.get("token") if data else None
         if now() >= config.end:
             return _error(401, "invalid_link", INVALID_LINK)

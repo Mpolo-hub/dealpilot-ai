@@ -667,3 +667,55 @@ def test_forwarded_for_hops() -> None:
     from dealpilot.demo.clientkey import from_forwarded_for
     assert from_forwarded_for(["1.1.1.1, 2.2.2.2, 3.3.3.3"], 2) == "2.2.2.2"
     assert from_forwarded_for(["3.3.3.3"], 2) is None
+
+
+# --------------------------------------------------------------------------- HIGH-1 (review)
+
+def test_ac_s1_auth_10_chunked_body_is_capped_without_buffering(env) -> None:
+    """A chunked body with no Content-Length is refused at the first chunk past 1 KB.
+
+    Driven at the ASGI level so the server, not the test client, decides how much it
+    reads: 64 chunks of 64 KiB are offered; the app must stop after the first one.
+    """
+    import anyio
+
+    app = create_app(env, clock=Clock())
+    pulled = {"n": 0}
+    sent: list[dict] = []
+    headers = [(b"host", b"testserver"), (b"origin", ORIGIN.encode()),
+               (b"content-type", b"application/json"), (b"transfer-encoding", b"chunked"),
+               (b"fly-client-ip", JUDGE_IP.encode())]
+    scope = {"type": "http", "asgi": {"version": "3.0"}, "http_version": "1.1",
+             "method": "POST", "scheme": "https", "path": "/access/redeem",
+             "raw_path": b"/access/redeem", "query_string": b"", "root_path": "",
+             "headers": headers, "client": ("127.0.0.1", 1), "server": ("testserver", 443)}
+
+    async def receive():
+        pulled["n"] += 1
+        if pulled["n"] > 64:
+            return {"type": "http.disconnect"}
+        return {"type": "http.request", "body": b"x" * 65536, "more_body": pulled["n"] < 64}
+
+    async def send(message):
+        sent.append(message)
+
+    anyio.run(app, scope, receive, send)
+    start = next(m for m in sent if m["type"] == "http.response.start")
+    assert start["status"] == 413
+    assert pulled["n"] <= 2                       # stopped at the first oversized chunk
+
+
+def test_ac_s1_rl_01_redeem_ip_limit_checked_before_the_body(env, monkeypatch) -> None:
+    """Once the per-IP redeem limit is reached, the body is not read at all."""
+    clock = Clock()
+    client = make_client(env, clock)
+    for _ in range(5):
+        assert redeem(client, "x" * 43).status_code == 401
+    from starlette.requests import Request
+
+    def must_not_read(self):
+        raise AssertionError("body read despite the rate limit")
+    monkeypatch.setattr(Request, "stream", must_not_read)
+    r = client.post("/access/redeem", content=b"{}" * 2000,
+                    headers={"Origin": ORIGIN, "Content-Type": "application/json"})
+    assert r.status_code == 429
