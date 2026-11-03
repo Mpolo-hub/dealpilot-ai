@@ -1,0 +1,316 @@
+/* Welcome and Login pages (spec 014 Annex D). References: DealDesign/welcome.png and
+   DealDesign/auth.png, drawn with the existing "liquid blue" tokens. */
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- shared ---- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--gradient-accent);
+  box-shadow: var(--glow-accent);
+  color: #fff;
+}
+
+.brandName {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.brandAccent {
+  color: var(--color-electric);
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-6);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--glow-accent);
+}
+
+.primaryButton:hover {
+  background: var(--color-primary-strong);
+}
+
+.primaryButton:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.primaryButton:focus-visible,
+.toggle:focus-visible,
+.backLink:focus-visible,
+.input:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ---- Welcome ---- */
+.welcomeMain {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+  display: grid;
+  gap: var(--space-6);
+  align-content: start;
+  outline: none;
+}
+
+.hero {
+  padding: var(--space-6);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-card);
+  background: var(--glass-fill);
+  box-shadow: var(--glass-shadow);
+}
+
+.heroTitle {
+  margin: var(--space-8) 0 var(--space-3);
+  font-size: clamp(26px, 5vw, 38px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.heroLead {
+  margin: 0 0 var(--space-6);
+  color: var(--color-text-muted);
+  font-size: 16px;
+}
+
+.features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.feature {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-card-raised);
+  color: var(--color-cyan-light);
+}
+
+.featureTitle {
+  margin: var(--space-3) 0 var(--space-1);
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.featureBody {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.ctaPanel {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.secure {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+/* ---- Login (split card) ---- */
+.loginMain {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6) var(--space-4);
+  background:
+    radial-gradient(60% 50% at 15% 20%, rgba(8, 124, 255, 0.28) 0%, transparent 60%),
+    radial-gradient(50% 40% at 90% 85%, rgba(0, 200, 255, 0.16) 0%, transparent 60%);
+  outline: none;
+}
+
+.authCard {
+  width: 100%;
+  max-width: 880px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--glass-shadow), 0 0 0 1px var(--glass-edge);
+}
+
+.authAside {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  background:
+    linear-gradient(90deg, transparent 70%, rgba(255, 255, 255, 0.18) 100%),
+    linear-gradient(150deg, var(--color-deep) 0%, var(--color-electric) 55%, #0a4fd6 100%);
+  color: #fff;
+}
+
+.asideTitle {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 30px);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.asideBody {
+  margin: 0;
+  color: #d9ecff;
+  font-size: 14px;
+}
+
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  background: #ffffff;
+  color: #0b1b33;
+}
+
+.brandDark .brandName {
+  color: #0b1b33;
+}
+
+.formTitle {
+  margin: var(--space-2) 0 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #0b1b33;
+}
+
+.formLead,
+.formNote {
+  margin: 0;
+  color: #44546b;
+  font-size: 14px;
+}
+
+.label {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: 14px;
+  font-weight: 600;
+  color: #0b1b33;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: 0 var(--space-2) 0 var(--space-4);
+  border: 1px solid #c4cfdd;
+  border-radius: var(--radius-pill);
+  background: #f1f4f8;
+}
+
+.field:focus-within {
+  border-color: var(--color-primary);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: 46px;
+  border: 0;
+  background: transparent;
+  color: #0b1b33;
+  font: inherit;
+  font-size: 15px;
+}
+
+.toggle {
+  min-height: 34px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: #0a5bd8;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.error {
+  margin: 0 0 var(--space-3);
+  color: #b3261e;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.notice {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  background: #e8f1ff;
+  color: #0b3a80;
+  font-size: 14px;
+}
+
+.backLink {
+  align-self: center;
+  color: #0a5bd8;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---- phones (375 px and up) ---- */
+@media (max-width: 767px) {
+  .features {
+    grid-template-columns: 1fr;
+  }
+
+  .authCard {
+    grid-template-columns: 1fr;
+  }
+
+  .authAside,
+  .authForm {
+    padding: var(--space-6) var(--space-4);
+  }
+}

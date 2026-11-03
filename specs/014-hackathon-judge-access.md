@@ -860,3 +860,48 @@ of this spec stays.
   - Sessions and rate-limit counters reset on every restart or sleep.
   - A cold start after sleep can take up to about one minute.
   - Revocation needs a redeploy.
+
+## Annex D. Amendment 2026-11-04: Welcome and invitation Login pages (S1-D13 amended)
+
+Approved by the product owner on 2026-11-04. It amends S1-D13 (A7-H1 D15-H1) only. The
+backend contract (JA-FR-05 to JA-FR-11, JA-SR-01 to JA-SR-08) is unchanged.
+
+- **New public screens** (public demo mode only; local mode unchanged):
+  - **Welcome, `/welcome`:**
+    - shows no data;
+    - holds the branding, the value proposition and the synthetic-data notice;
+    - has one call to action, to `/login`.
+
+    Design reference: `DealDesign/welcome.png`.
+  - **Invitation Login, `/login`:**
+    - one field that accepts the invitation code, or the full invitation link (the part
+      after `#` is used), with a show and hide toggle;
+    - it posts `{token}` to `POST /access/redeem`, with the same code as `/access`;
+    - the code stays in memory only: never in localStorage, sessionStorage or the URL.
+
+    Design reference: `DealDesign/auth.png`, layout only. That reference shows another
+    brand with a username, a password, "remember me", password reset and sign-up. None of
+    these exists here, and none is shown.
+- **Login states:**
+  - an empty field;
+  - loading;
+  - one generic message for invalid, expired or revoked invitations (401 or 403, never
+    told apart);
+  - too many attempts (429);
+  - service waking up or unavailable (5xx or a network error);
+  - success, then a redirect to `/`.
+
+  An already signed-in visitor who opens `/login` goes to `/`.
+- **Routing:**
+  - Without a session, the protected pages (`/`, `/analysis`, `/products`, `/data`) go to
+    `/welcome`. The app learns this from one `GET /v1/metadata` call, which answers 401.
+  - An expired or revoked session (a 401 after sign-in) goes to `/login`, with the message
+    `access.signedOut`.
+  - Sign-out goes to `/welcome`.
+  - The invitation link `/access#<code>` keeps working.
+  - The server stays the control: every `/v1` request without a session gets 401.
+- **Acceptance:**
+  - AC-S1-UI-02 now reads: "a 401 after sign-in goes to /login with the message".
+  - AC-S1-UI-03 now reads: "sign-out calls /access/logout, then goes to /welcome".
+  - The S1-b signed-out page is replaced by these redirects.
+  - New tests are in `frontend/tests/pages/publicpages.test.tsx`.

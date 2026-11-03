@@ -98,23 +98,30 @@ describe("access page S1-a (JA-FR-05)", () => {
   });
 });
 
-describe("signed-out page S1-b and sign-out S1-c", () => {
-  it("AC-S1-UI-02: a 401 from a /v1 call shows the signed-out page", async () => {
+describe("expired session and sign-out (S1-b and S1-c, amended by spec 014 Annex D)", () => {
+  it("AC-S1-UI-02 (amended): a 401 from a /v1 call after sign-in goes to /login with a message", async () => {
     publicMode();
-    installFakeApi((url) => url.pathname === "/v1/metadata" ? errorResponse(401, "unauthorized") : undefined);
+    let calls = 0;
+    installFakeApi((url) => {
+      if (url.pathname !== "/v1/metadata") return undefined;
+      calls += 1;
+      return calls === 1 ? undefined : errorResponse(401, "unauthorized"); // probe ok, then expired
+    });
     renderAt("/data");
     await screen.findByText(text.access.signedOut);
+    await waitFor(() => expect(currentLocation).toBe("/login"));
+    expect(screen.getByRole("heading", { name: text.login.title, level: 1 })).toBeTruthy();
     expect(screen.queryByRole("navigation", { name: text.app.mainNavigation })).toBeNull();
-    expect(screen.getByText(text.access.demoNotice)).toBeTruthy();
   });
 
-  it("AC-S1-UI-03: sign-out calls /access/logout, then shows the signed-out page", async () => {
+  it("AC-S1-UI-03 (amended): sign-out calls /access/logout, then goes to /welcome", async () => {
     publicMode();
     installFakeApi((url) => url.pathname === "/access/logout" ? new Response(null, { status: 204 }) : undefined);
     renderAt("/");
     await screen.findByRole("heading", { name: text.dashboard.title, level: 1 });
     await userEvent.click(screen.getByRole("button", { name: text.access.signOut }));
-    await screen.findByText(text.access.signedOut);
+    await screen.findByRole("heading", { name: text.welcome.title, level: 1 });
+    expect(currentLocation).toBe("/welcome");
     const [, init] = fetchCalls().find(([p]) => p === "/access/logout")!;
     expect(init?.method).toBe("POST");
     expect(init?.credentials).toBe("same-origin");

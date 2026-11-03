@@ -1,37 +1,95 @@
 // Routes of the first release (spec 007 section 5): four screens and "Page not found".
-// In the Stage 1 public demo (A7-H1 D15-H1) also the access page, outside the shell, and
-// the signed-out page, shown once the session has ended.
-import { useEffect, useState } from "react";
-import { Route, Routes } from "react-router";
+// Stage 1 public demo (spec 014; A7-H1 D15-H1; Annex D, S1-D13 amended 2026-11-04):
+// - /welcome and /login are public; /access redeems an invitation link;
+// - without a session, the protected pages go to /welcome; an expired session goes to
+//   /login with a message; sign-out goes to /welcome.
+// The server stays the control: every /v1 request without a session gets 401.
+import { useEffect, useState, type ReactNode } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router";
 
-import { onSessionEnded } from "./api/session";
+import { METADATA } from "./api/endpoints";
+import { onSessionEnded, onSignedIn, onSignedOut } from "./api/session";
 import { AppShell } from "./components/AppShell";
 import { isPublicDemo } from "./demo";
 import { clearApiCache } from "./hooks/useApi";
-import { AccessPage, SignedOutPage } from "./pages/AccessPages";
+import { AccessPage } from "./pages/AccessPages";
 import { DashboardPage } from "./pages/DashboardPage";
 import { DataPage } from "./pages/DataPage";
+import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { SalesAnalysisPage } from "./pages/SalesAnalysisPage";
+import { WelcomePage } from "./pages/WelcomePage";
+import { text } from "./text/en";
+
+type Auth = "checking" | "in" | "out" | "expired";
+
+/** Does the browser hold a valid session? One cheap /v1 call: 401 means no. */
+async function probeSession(): Promise<Auth> {
+  try {
+    const response = await fetch(METADATA, { credentials: "same-origin" });
+    return response.status === 401 ? "out" : "in";
+  } catch {
+    return "in"; // network trouble: let the pages show their own error states
+  }
+}
+
+function usePublicAuth(enabled: boolean, probe: boolean): Auth {
+  const [auth, setAuth] = useState<Auth>(enabled ? "checking" : "in");
+  // The invitation link page (/access) redeems first; it needs no probe.
+  useEffect(() => {
+    if (!enabled || !probe) return undefined;
+    let active = true;
+    probeSession().then((result) => {
+      if (active) setAuth((current) => (current === "checking" ? result : current));
+    });
+    return () => {
+      active = false;
+    };
+  }, [enabled, probe]);
+  useEffect(() => {
+    if (!enabled) return undefined;
+    const stops = [
+      onSessionEnded(() => {
+        clearApiCache();
+        setAuth("expired");
+      }),
+      onSignedOut(() => {
+        clearApiCache();
+        setAuth("out");
+      }),
+      onSignedIn(() => {
+        clearApiCache();
+        setAuth("in");
+      }),
+    ];
+    return () => stops.forEach((stop) => stop());
+  }, [enabled]);
+  return auth;
+}
 
 export function App() {
   const publicDemo = isPublicDemo();
-  const [signedOut, setSignedOut] = useState(false);
+  const onAccessPage = useLocation().pathname === "/access";
+  const auth = usePublicAuth(publicDemo, !onAccessPage);
 
-  useEffect(() => {
-    if (!publicDemo) return undefined;
-    return onSessionEnded(() => {
-      clearApiCache();
-      setSignedOut(true);
-    });
-  }, [publicDemo]);
+  let shell: ReactNode = <AppShell />;
+  if (publicDemo && auth === "checking") {
+    shell = <p className="visually-hidden" role="status">{text.common.loading}</p>;
+  } else if (publicDemo && auth === "out") {
+    shell = <Navigate to="/welcome" replace />;
+  } else if (publicDemo && auth === "expired") {
+    shell = <Navigate to="/login" replace state={{ expired: true }} />;
+  }
 
-  if (signedOut) return <SignedOutPage />;
   return (
     <Routes>
       {publicDemo && <Route path="access" element={<AccessPage />} />}
-      <Route element={<AppShell />}>
+      {publicDemo && <Route path="welcome" element={<WelcomePage />} />}
+      {publicDemo && (
+        <Route path="login" element={auth === "in" ? <Navigate to="/" replace /> : <LoginPage />} />
+      )}
+      <Route element={shell}>
         <Route index element={<DashboardPage />} />
         <Route path="data" element={<DataPage />} />
         <Route path="analysis" element={<SalesAnalysisPage />} />

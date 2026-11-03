@@ -5,7 +5,7 @@ import { NavLink, Outlet, useLocation } from "react-router";
 
 import { postJson } from "../api/client";
 import { ACCESS_LOGOUT } from "../api/endpoints";
-import { notifySessionEnded } from "../api/session";
+import { notifySignedOut } from "../api/session";
 import { isPublicDemo } from "../demo";
 import { text } from "../text/en";
 import styles from "./AppShell.module.css";
@@ -32,10 +32,10 @@ export function AppShell() {
   const publicDemo = isPublicDemo();
   const [signingOut, setSigningOut] = useState(false);
 
-  // S1-c: logout, then the signed-out page. A failed call still ends the session here.
+  // S1-c: logout, then the Welcome page (S1-D13 amended). A failed call still signs out here.
   const signOut = () => {
     setSigningOut(true);
-    postJson(ACCESS_LOGOUT, {}).catch(() => undefined).finally(notifySessionEnded);
+    postJson(ACCESS_LOGOUT, {}).catch(() => undefined).finally(notifySignedOut);
   };
 
   return (
