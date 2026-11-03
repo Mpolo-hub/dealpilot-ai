@@ -85,21 +85,38 @@ function ProductTable({ dims, rows, query, category, status }: {
 }) {
   const reference = dims.date_range.end; // D4: Products uses the dataset end
   const revenue = new Map(rows.map((r) => [r.product_id, r.revenue]));
+  const units = new Map(rows.map((r) => [r.product_id, r.units]));
   const needle = query.trim().toLowerCase();
-  const list = dims.products
-    .map((p) => ({ ...p, revenue: revenue.get(p.product_id) ?? "0.00", status: productStatus(p, reference) }))
+  const all = dims.products
+    .map((p) => ({ ...p, revenue: revenue.get(p.product_id) ?? "0.00", units: units.get(p.product_id) ?? 0,
+      status: productStatus(p, reference) }));
+  // Best and lowest sellers over the whole catalog (ties broken by product ID).
+  const ranked = [...all].sort((a, b) => {
+    const diff = toCents(b.revenue) - toCents(a.revenue);
+    return diff !== 0n ? (diff > 0n ? 1 : -1) : a.product_id.localeCompare(b.product_id);
+  });
+  const best = ranked[0];
+  const worst = ranked[ranked.length - 1];
+  const list = all
     .filter((p) => !needle || p.product_id.toLowerCase().includes(needle) || p.name.toLowerCase().includes(needle))
     .filter((p) => !dims.categories.includes(category) || p.category === category)
     .filter((p) => !STATUSES.includes(status as ProductStatus) || p.status === status);
   return (
     <>
       <ResultCount>{t.count(formatCount(list.length), formatCount(dims.products.length))}</ResultCount>
+      {best && worst && (
+        <p className="table-note">
+          {t.bestWorst(`${best.name} (${formatMoney(best.revenue)})`, `${worst.name} (${formatMoney(worst.revenue)})`)}
+        </p>
+      )}
       <DataTable caption={t.title} rows={list} rowKey={(p) => p.product_id}
       initialSort={{ key: "id", direction: "asc" }} empty={<EmptyState message={t.noMatch} />}
       columns={[
         { key: "id", header: t.id, tone: "muted", cell: (p) => p.product_id, sortValue: (p) => p.product_id },
         { key: "name", header: t.name, tone: "strong", cell: (p) => p.name, sortValue: (p) => p.name },
         { key: "category", header: t.category, cell: (p) => p.category, sortValue: (p) => p.category },
+        { key: "units", header: t.units, align: "end", cell: (p) => formatCount(p.units),
+          sortValue: (p) => p.units },
         { key: "sales", header: t.sales, align: "end", cell: (p) => formatMoney(p.revenue),
           sortValue: (p) => toCents(p.revenue) },
         { key: "status", header: t.status, cell: (p) => <StatusBadge status={p.status} label={t.statuses[p.status]} />,

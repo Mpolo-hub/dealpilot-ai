@@ -97,6 +97,8 @@ export const text = {
     activeNote: (count: string, date: string) => `of ${count} products, on ${date}`,
     customers: "Customers in dataset",
     customersNote: "Not filtered by date",
+    unitsSold: (units: string) => `${units} units sold`,
+    averageOrder: (value: string) => `Average order ${value}`,
     vsLastYear: "vs same period last year",
     dailySales: "Daily sales",
     actualSales: "Actual sales",
@@ -142,6 +144,8 @@ export const text = {
     id: "ID",
     name: "Product name",
     sales: "Sales (total)",
+    units: "Units sold",
+    bestWorst: (best: string, worst: string) => `Best seller: ${best}. Lowest sales: ${worst}.`,
     productCount: "Products",
     statusNote: (date: string) => `Status on ${date}, the last day of the dataset.`,
     salesPeriod: (start: string, end: string) =>
@@ -172,6 +176,9 @@ export const text = {
     notRecorded: "Not recorded",
     tablesCard: "Tables",
     tablesNote: "Row counts below",
+    syntheticTitle: "Synthetic data",
+    syntheticNotice: "Every figure in this application comes from the DealPilot synthetic data " +
+      "generator (seed 42). It is not real customer, company or sales data.",
     periodCard: "Dataset period",
     periodDays: (days: string) => `${days} days`,
     periodNote: (start: string, end: string) => `${start} to ${end}`,

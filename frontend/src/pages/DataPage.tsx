@@ -28,6 +28,9 @@ export function DataPage() {
   return (
     <>
       <PageHeader title={t.title} subtitle={t.subtitle} />
+      <Card title={t.syntheticTitle} icon="info">
+        <p className="table-note">{t.syntheticNotice}</p>
+      </Card>
       <Tabs tabs={TABS} current={tab} label={t.title} />
       <Loaded state={meta} retry={retryMeta} height={280}>
         {(m) => (

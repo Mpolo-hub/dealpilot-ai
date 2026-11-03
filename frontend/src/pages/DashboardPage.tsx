@@ -62,12 +62,15 @@ export function DashboardPage() {
           {(m) => (
             <KpiCard icon="money" label={t.totalSales} value={formatMoneyCompact(toDollars(m.totals.revenue))}
               exact={formatMoney(m.totals.revenue)}
+              note={m.totals.orders === 0 ? undefined
+                : t.averageOrder(formatMoneyCompact(toDollars(m.totals.revenue) / m.totals.orders))}
               badge={badge((before) => moneyChange(m.totals.revenue, before.totals.revenue))} />
           )}
         </Loaded>
         <Loaded state={totals} retry={retryTotals} height={88}>
           {(m) => (
             <KpiCard icon="orders" label={t.orders} value={formatCount(m.totals.orders)}
+              note={t.unitsSold(formatCount(m.totals.units))}
               badge={badge((before) => before.totals.orders === 0 ? null
                 : (m.totals.orders - before.totals.orders) / before.totals.orders)} />
           )}
