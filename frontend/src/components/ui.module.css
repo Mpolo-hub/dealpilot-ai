@@ -188,6 +188,16 @@
   color: #ffffff;
 }
 
+/* A value made of words (Prediction "Model" card, Data "Dataset period"): it wraps
+   instead of running out of the card, which also widened the page. */
+.kpiValueText {
+  font-size: 20px;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
 .kpiNote {
   grid-area: note;
   align-self: start;

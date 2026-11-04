@@ -2,7 +2,9 @@
    DealPilot dark theme. Colors and surfaces come from the tokens. */
 .form {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr)) auto;
+  /* Four columns (level, category, product, region; then cutoff, horizon and the
+     button), so every selected text fits; three columns below 1280 px, one below 768. */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: end;
   gap: var(--space-3) var(--space-4);
   margin-bottom: var(--space-4);
@@ -20,6 +22,7 @@
 }
 
 .generate {
+  grid-column: -2 / -1;
   height: 40px;
   white-space: nowrap;
 }
@@ -128,6 +131,15 @@
 .selected {
   font-weight: 400;
   color: var(--color-text-muted);
+}
+
+/* A KPI change line under the note: the badge and its comparison period. */
+.change {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--space-2);
+  margin-top: 6px;
 }
 
 @media (max-width: 1279px) {

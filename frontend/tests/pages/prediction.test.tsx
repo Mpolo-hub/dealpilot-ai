@@ -1,5 +1,8 @@
 // Prediction page (spec 007 D14 amendment, 2026-11-04) against the fake API. Expected values
 // are worked out here from the fixture lines (tests/fakeApi.ts) and spec 003 section 6.1.
+// @ts-expect-error Node types are not installed; Vitest runs the tests in Node.
+import { readFileSync } from "node:fs";
+
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -83,6 +86,9 @@ describe("Prediction page", () => {
     const products = within(screen.getByLabelText(t.product)).getAllByRole("option").map((o) => o.textContent);
     expect(products).toEqual(["Kite Set (P003)", "Puzzle Box (P004)"]);
     await userEvent.selectOptions(screen.getByLabelText(t.product), "P003");
+    // Every select carries its full selected text as a tooltip.
+    expect(screen.getByLabelText(t.level).getAttribute("title")).toBe(t.levels.product_region);
+    expect(screen.getByLabelText(t.product).getAttribute("title")).toBe("Kite Set (P003)");
     await userEvent.selectOptions(screen.getByLabelText(t.region), "R01");
     const cutoff = screen.getByLabelText(t.cutoff);
     await userEvent.clear(cutoff);
@@ -182,6 +188,34 @@ describe("Prediction page", () => {
       expect(label).not.toMatch(/\b(settings|notifications?|export|new|sign in|log in)\b/i);
     }
     expect(document.body.textContent).not.toMatch(/John Doe|Administrator|Expected demand|confidence/i);
+  });
+
+  it("the Model card value may wrap and changes sit under the values (no overflow)", async () => {
+    // jsdom has no layout: this checks the classes and rules that keep the text inside the
+    // card. The widths 1600, 1280, 1024 and 375 px were measured in a real browser.
+    installFakeApi();
+    renderAt("/prediction?level=total&cutoff=2024-12-31&horizon=28");
+    const model = await screen.findByRole("region", { name: t.model });
+    const value = within(model).getByText("Seasonal Naive v1.0");
+    expect(value.className).toMatch(/kpiValueText/);
+    const uiCss: string = readFileSync("src/components/ui.module.css", "utf-8");
+    const start = uiCss.indexOf(".kpiValueText {");
+    const rule = uiCss.slice(start, uiCss.indexOf("}", start));
+    expect(start).toBeGreaterThan(-1);
+    expect(rule).toContain("white-space: normal");
+    expect(rule).toContain("overflow-wrap: anywhere");
+    // The change badge is part of the note line, not beside the label.
+    const forecasted = screen.getByRole("region", { name: t.forecasted });
+    const badge = within(forecasted).getByText("+300.0%");
+    expect(badge.closest("p")?.textContent).toContain(t.forecastedNote(28));
+    expect(within(forecasted).getByText(t.vsLast(28), { selector: "span[aria-hidden]" })).toBeTruthy();
+  });
+
+  it("the Data page period value may wrap like the Model card", async () => {
+    installFakeApi();
+    renderAt("/data");
+    const period = await screen.findByRole("region", { name: text.data.periodCard });
+    expect(within(period).getByText(text.data.periodDays("731")).className).toMatch(/kpiValueText/);
   });
 
   it("in public mode it is protected like the other pages", async () => {

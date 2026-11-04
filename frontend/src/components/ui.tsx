@@ -70,16 +70,18 @@ export function Card({ title, icon, actions, children, className }: {
   );
 }
 
-export function KpiCard({ icon, label, value, exact, note, badge }: {
+export function KpiCard({ icon, label, value, exact, note, badge, textValue = false }: {
   icon: IconName; label: string; value: ReactNode; exact?: string; note?: ReactNode;
   badge?: ReactNode;
+  /** The value is words (a model name), not a number: smaller, and it may wrap. */
+  textValue?: boolean;
 }) {
   return (
     <section className={styles.kpi} aria-label={label}>
       <span className={styles.kpiIcon}><Icon name={icon} size={20} /></span>
       <h2 className={styles.kpiLabel}>{label}</h2>
       {badge && <div className={styles.kpiBadge}>{badge}</div>}
-      <p className={styles.kpiValue} title={exact ? `${text.common.exactValue}: ${exact}` : undefined}>
+      <p className={`${styles.kpiValue} ${textValue ? styles.kpiValueText : ""}`} title={exact ? `${text.common.exactValue}: ${exact}` : undefined}>
         {value}
         {exact && <span className="visually-hidden"> ({text.common.exactValue}: {exact})</span>}
       </p>
@@ -128,7 +130,9 @@ export function Select({ id, label, value, options, onChange, inline = false, di
   return (
     <div className={`${styles.field} ${inline ? styles.fieldInline : ""}`}>
       <label htmlFor={id} className={styles.fieldLabel}>{label}</label>
+      {/* The title shows the full selected text if a narrow control ever cuts it. */}
       <select id={id} className={styles.control} value={value} disabled={disabled}
+        title={options.find((option) => option.value === value)?.label}
         onChange={(event) => onChange(event.target.value)}>
         {options.map((option) => (
           <option key={option.value} value={option.value}>{option.label}</option>

@@ -38,7 +38,7 @@ export function DataPage() {
             <KpiRow>
               <KpiCard icon="data" label={t.seed} value={String(m.seed)}
                 note={t.seedNote(m.generator_version)} />
-              <KpiCard icon="calendar" label={t.periodCard}
+              <KpiCard icon="calendar" label={t.periodCard} textValue
                 value={t.periodDays(formatCount(daysInclusive(m.start, m.end)))}
                 note={t.periodNote(formatDate(m.start), formatDate(m.end))} />
               <KpiCard icon="table" label={t.tablesCard}

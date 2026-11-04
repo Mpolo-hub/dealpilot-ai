@@ -170,17 +170,31 @@ function ForecastResults({ dims, query, tab, onSubmit }: {
     <>
       {form}
       <KpiRow>
+        {/* The change sits under the value (reference), so the label keeps the card width. */}
         <KpiCard icon="orders" label={t.historical} value={formatCount(kpis.historical)}
-          note={t.historicalNote(kpis.historyDays)}
-          badge={kpis.historicalChange !== null
-            ? <ChangeBadge change={kpis.historicalChange} label={t.vsPrevious} /> : undefined} />
+          note={<>
+            {t.historicalNote(kpis.historyDays)}
+            {kpis.historicalChange !== null && (
+              <span className={styles.change}>
+                <ChangeBadge change={kpis.historicalChange} label={t.vsPrevious} />
+                <span aria-hidden="true">{t.vsPrevious}</span>
+              </span>
+            )}
+          </>} />
         <KpiCard icon="trend" label={t.forecasted} value={formatCount(kpis.forecasted)}
-          note={t.forecastedNote(answer.horizon)}
-          badge={kpis.forecastChange !== null
-            ? <ChangeBadge change={kpis.forecastChange} label={t.vsLast(answer.horizon)} /> : undefined} />
+          note={<>
+            {t.forecastedNote(answer.horizon)}
+            {kpis.forecastChange !== null && (
+              <span className={styles.change}>
+                <ChangeBadge change={kpis.forecastChange} label={t.vsLast(answer.horizon)} />
+                <span aria-hidden="true">{t.vsLast(answer.horizon)}</span>
+              </span>
+            )}
+          </>} />
         <KpiCard icon="calendar" label={t.horizonCard} value={t.horizonDays(answer.horizon)}
           note={t.range(formatDate(first), formatDate(last))} />
-        <KpiCard icon="bars" label={t.model} value={modelName(answer.model.name, answer.model.version)}
+        <KpiCard icon="bars" label={t.model} textValue
+          value={modelName(answer.model.name, answer.model.version)}
           badge={<Badge tone="info">{t.baseline}</Badge>} />
       </KpiRow>
       <Grid variant="wide-narrow">
