@@ -1,0 +1,148 @@
+/* Prediction page (spec 007 D14 amendment, 2026-11-04): layout of prediction.png in the
+   DealPilot dark theme. Colors and surfaces come from the tokens. */
+.form {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  position: relative;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-inner), var(--glass-shadow);
+  border-radius: var(--radius-card);
+}
+
+.form select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.generate {
+  height: 40px;
+  white-space: nowrap;
+}
+
+.generate:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.formError {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-red);
+}
+
+.chartSubtitle {
+  margin: calc(-1 * var(--space-2)) 0 var(--space-3);
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.notice {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  font-size: 13px;
+  border-radius: var(--radius-control);
+  background: var(--color-primary-soft);
+  color: var(--color-text);
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin-top: var(--space-3);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legendActual {
+  stroke: var(--color-electric);
+  stroke-width: 2.5;
+}
+
+.legendForecast {
+  stroke: var(--chart-6);
+  stroke-width: 2.5;
+  stroke-dasharray: 5 4;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: minmax(96px, auto) minmax(0, 1fr);
+  margin: 0;
+  font-size: 13px;
+}
+
+.details dt,
+.details dd {
+  margin: 0;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.details dt {
+  color: var(--color-text-muted);
+  padding-right: var(--space-3);
+}
+
+.details dd {
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.note {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3);
+  font-size: 13px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--glass-edge);
+  background: var(--color-primary-soft);
+}
+
+.tabsSection {
+  margin-top: var(--space-4);
+}
+
+.tableNote {
+  margin: var(--space-3) 0 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.evaluationLabel {
+  margin: 0 0 var(--space-2);
+}
+
+.selected {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 1279px) {
+  .form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .generate {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .form {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-4);
+  }
+}

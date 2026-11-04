@@ -1,8 +1,9 @@
-// The four spec 002 endpoints the first release uses (spec 007 sections 3.1 and 4), as
-// same-origin paths. Nothing else is ever requested, except the two Stage 1 access paths
-// in public demo mode (spec 014 JA-FR-05 and JA-FR-08).
+// The four spec 002 endpoints the first release uses (spec 007 sections 3.1 and 4), plus
+// `/v1/forecasts` for the Prediction page (spec 003 section 10, D11 approved 2026-11-04;
+// spec 007 D14 amendment), as same-origin paths. Nothing else is ever requested, except
+// the two Stage 1 access paths in public demo mode (spec 014 JA-FR-05 and JA-FR-08).
 import { buildQuery } from "./client";
-import type { MetricsQuery } from "./types";
+import type { ForecastQuery, MetricsQuery } from "./types";
 
 export const ACCESS_REDEEM = "/access/redeem";
 export const ACCESS_LOGOUT = "/access/logout";
@@ -24,5 +25,17 @@ export function metricsPath(query: MetricsQuery): string {
     product_id: query.product_id,
     category: query.category,
     region_id: query.region_id,
+  });
+}
+
+/** Only the key parameters of the level are sent (spec 003 section 10 refuses the others). */
+export function forecastsPath(query: ForecastQuery): string {
+  return "/v1/forecasts" + buildQuery({
+    level: query.level,
+    category: query.level === "category" ? query.category : undefined,
+    product_id: query.level === "product_region" ? query.product_id : undefined,
+    region_id: query.level === "product_region" ? query.region_id : undefined,
+    cutoff: query.cutoff,
+    horizon: String(query.horizon),
   });
 }

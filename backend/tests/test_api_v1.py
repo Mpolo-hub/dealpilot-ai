@@ -1,5 +1,5 @@
 """
-Spec 002 (API v1) acceptance criteria AC-API-01 to AC-API-17.
+Spec 002 (API v1) acceptance criteria AC-API-01 to AC-API-17 (AC-API-17 amended 2026-11-04).
 
 Data: the session seed-42 run from conftest (`generated_dir`). Expected values come from
 SQL written here against the same Parquet files, not from dealpilot.analytics. Money is
@@ -423,14 +423,19 @@ def test_ac_api_15_size_limit(client: TestClient, db, meta: dict) -> None:
         db, meta["start"], meta["end"], [month_expr, "l.product_id", "o.region_id"])) == 8_212
 
 
-def test_ac_api_17_forecasting_is_not_served(client: TestClient) -> None:
-    """AC-API-17: /v1/forecasts is not a route; the schema has no forecast path."""
+def test_ac_api_17_forecasting_is_served(client: TestClient) -> None:
+    """AC-API-17 (amended 2026-11-04, spec 002 D10 and spec 003 D11): /v1/forecasts is
+    served as spec 003 section 10 and listed in the schema; its full contract is tested by
+    AC-FC-API-01 to 05 in tests/test_forecasting_api.py."""
+    r = client.get("/v1/forecasts?level=total")
+    assert r.status_code == 200
+    assert r.json()["model"]["name"] == "seasonal_naive"
     r = client.get("/v1/forecasts")
-    assert r.status_code == 404
-    assert r.json()["error"]["code"] == "not_found"
+    assert r.status_code == 422 and r.json()["error"]["code"] == "invalid_parameter"
     paths = client.get("/openapi.json").json()["paths"]
-    assert not [p for p in paths if "forecast" in p]
-    assert {"/health", "/v1/metadata", "/v1/dimensions", "/v1/sales/metrics"} <= set(paths)
+    assert [p for p in paths if "forecast" in p] == ["/v1/forecasts"]
+    assert {"/health", "/v1/metadata", "/v1/dimensions", "/v1/sales/metrics",
+            "/v1/forecasts"} <= set(paths)
 
 
 def test_api_sorting_follows_group_by_order(client: TestClient) -> None:

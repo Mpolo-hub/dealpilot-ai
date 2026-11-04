@@ -118,16 +118,17 @@ export function ChangeBadge({ change, label }: { change: number | null; label: s
   );
 }
 
-export function Select({ id, label, value, options, onChange, inline = false }: {
+export function Select({ id, label, value, options, onChange, inline = false, disabled = false }: {
   id: string; label: string; value: string;
   options: { value: string; label: string }[]; onChange: (value: string) => void;
   /** Label beside the control (for card headers) instead of above it. */
   inline?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <div className={`${styles.field} ${inline ? styles.fieldInline : ""}`}>
       <label htmlFor={id} className={styles.fieldLabel}>{label}</label>
-      <select id={id} className={styles.control} value={value}
+      <select id={id} className={styles.control} value={value} disabled={disabled}
         onChange={(event) => onChange(event.target.value)}>
         {options.map((option) => (
           <option key={option.value} value={option.value}>{option.label}</option>

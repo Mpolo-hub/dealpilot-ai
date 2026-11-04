@@ -1,4 +1,5 @@
-"""/v1 endpoints (spec 002 section 5). Read-only; never touches expected_demand.parquet.
+"""/v1 endpoints (spec 002 section 5, and /v1/forecasts from spec 003 section 10 since the
+2026-11-04 amendment of spec 002 D10). Read-only; never touches expected_demand.parquet.
 
 Query parameters are read from the raw request so the checks run in the exact order of
 section 3.5 (unknown parameters first, then data-free checks, then data, then data-based
@@ -6,7 +7,8 @@ checks, then result size). They are still listed in the OpenAPI docs via openapi
 """
 from __future__ import annotations
 
-from datetime import date
+import re
+from datetime import date, timedelta
 
 from fastapi import APIRouter, Request
 from starlette.datastructures import QueryParams
@@ -21,6 +23,12 @@ from dealpilot.analytics.sales import (
     sales_metrics,
 )
 from dealpilot.api.errors import APIError, detail
+from dealpilot.forecasting.serving import (
+    MAX_HORIZON,
+    MIN_HISTORY_DAYS,
+    SeriesKey,
+    forecast_response,
+)
 
 router = APIRouter(prefix="/v1")
 
@@ -203,3 +211,89 @@ def _unknown_filter_values(con, filters: dict[str, list[str]]) -> list[dict]:
     }
     return [detail(name, value, "not found in the data")
             for name, values in filters.items() for value in values if value not in known[name]]
+
+
+# --------------------------------------------------------------------------- forecasts
+
+FORECAST_LEVELS = ("total", "category", "product_region")
+FORECAST_KEYS = {"total": (), "category": ("category",),
+                 "product_region": ("product_id", "region_id")}
+FORECAST_PARAMS = {"level", "category", "product_id", "region_id", "cutoff", "horizon"}
+FORECAST_TABLES = ("regions", "products", "orders", "order_lines")
+_DIGITS = re.compile(r"[0-9]{1,3}")
+
+
+@router.get(
+    "/forecasts",
+    openapi_extra={"parameters": [
+        _query_doc("level", "total, category or product_region. Required."),
+        _query_doc("category", "Required when level=category, otherwise not allowed."),
+        _query_doc("product_id", "Required when level=product_region, otherwise not allowed."),
+        _query_doc("region_id", "Required when level=product_region, otherwise not allowed."),
+        _query_doc("cutoff", "Last day of training data, YYYY-MM-DD. Default: dataset end."),
+        _query_doc("horizon", "Days forecast after cutoff, 1 to 28. Default 28."),
+    ]},
+)
+def forecasts_endpoint(request: Request) -> dict:
+    """Seasonal naive forecast for one series (spec 003 section 10, D11 approved
+    2026-11-04; spec 002 D10 amended). Never reads expected_demand.parquet or parameters."""
+    params = request.query_params
+    _reject_unknown(params, FORECAST_PARAMS)  # step 1
+
+    # invalid_date: cutoff is not a real date (a repeated cutoff is invalid_parameter).
+    cutoff_values = params.getlist("cutoff")
+    cutoff_raw = cutoff_values[0] if len(cutoff_values) == 1 else None
+    cutoff = parse_iso_date(cutoff_raw) if cutoff_raw is not None else None
+    if cutoff_raw is not None and cutoff is None:
+        raise APIError(422, "invalid_date", "cutoff must be a real date in YYYY-MM-DD format.",
+                       [detail("cutoff", cutoff_raw, "not a real date in YYYY-MM-DD format")])
+
+    # invalid_parameter: level, horizon, missing, extra or repeated key parameters.
+    bad = [detail(name, None, "given more than once")
+           for name in ("level", "cutoff", "horizon", "category", "product_id", "region_id")
+           if len(params.getlist(name)) > 1]
+    level = params.get("level") if len(params.getlist("level")) == 1 else None
+    if "level" not in params:
+        bad.append(detail("level", None, "required"))
+    elif level is not None and level not in FORECAST_LEVELS:
+        bad.append(detail("level", level, "must be one of: " + ", ".join(FORECAST_LEVELS)))
+    horizon = MAX_HORIZON
+    if len(params.getlist("horizon")) == 1:
+        raw = params["horizon"]
+        if _DIGITS.fullmatch(raw) and 1 <= int(raw) <= MAX_HORIZON:
+            horizon = int(raw)
+        else:
+            bad.append(detail("horizon", raw, "must be an integer from 1 to 28"))
+    if level in FORECAST_KEYS:
+        needed = FORECAST_KEYS[level]
+        bad += [detail(name, None, f"required when level={level}")
+                for name in needed if name not in params]
+        bad += [detail(name, params.get(name), f"not allowed when level={level}")
+                for name in ("category", "product_id", "region_id")
+                if name in params and name not in needed]
+    if bad:
+        raise APIError(422, "invalid_parameter", "The request has an invalid parameter.", bad)
+
+    # invalid_filter: an empty key value.
+    keys = {name: params[name] for name in FORECAST_KEYS[level]}
+    empty = [detail(name, value, "empty value") for name, value in keys.items() if value == ""]
+    if empty:
+        raise APIError(422, "invalid_filter", "Key values must not be empty.", empty)
+
+    with open_dataset(FORECAST_TABLES) as ds:  # data_unavailable (503)
+        cutoff = cutoff or ds.end
+        if not ds.start <= cutoff <= ds.end:
+            raise APIError(422, "date_out_of_range", "cutoff must be inside the dataset range.",
+                           [detail("cutoff", cutoff.isoformat(),
+                                   f"outside the dataset range {ds.start.isoformat()} to "
+                                   f"{ds.end.isoformat()}")])
+        earliest = ds.start + timedelta(days=MIN_HISTORY_DAYS)
+        if cutoff < earliest:
+            raise APIError(422, "invalid_parameter", "Not enough history before the cutoff.",
+                           [detail("cutoff", cutoff.isoformat(),
+                                   f"must be on or after {earliest.isoformat()}")])
+        unknown = _unknown_filter_values(ds.con, {name: [value] for name, value in keys.items()})
+        if unknown:
+            raise APIError(422, "invalid_filter", "A key value doesn't exist in the data.",
+                           unknown)
+        return forecast_response(ds.con, SeriesKey(level, **keys), ds.start, cutoff, horizon)

@@ -755,3 +755,50 @@ The analysis presented for the decisions:
 | D12 | Chart library or hand-drawn SVG? | Hand-drawn SVG components (line, donut, horizontal bars, columns) | Recharts 3.10.1 (MIT; 41 runtime packages with its peer); ECharts (Apache-2.0, canvas, large) | Hand-drawn SVG | Business: the same charts; tooltips and legends written in-house. Technical: more code to write and test, but 41 fewer packages in the browser and full control of the look | No / No (Recharts: Yes) / No |
 | D13 | Use Playwright for end-to-end and screenshot checks? | `@playwright/test` 1.64.1 plus a Chromium download | Component tests only, plus a manual fidelity review | Playwright | Business: AC-UI-13 and AC-UI-14 checked automatically. Technical: about 150 MB browser download outside the repository; 3 development packages | No / Yes (plus browser binaries) / No |
 | D14 | When do pages beyond F1 come? | Each after its data contract exists (for example spec 003 D11 for forecasts), in its own spec or amendment | Build them now with placeholder data | Contract first | Business: no page shows invented or unapproved data. Technical: no throwaway screens | Not for F1 (later pages may need API changes, each approved separately) / No / Yes |
+
+## 16. Amendment, 2026-11-04: Prediction screen (D14)
+
+**Decision (product owner, 2026-11-04).** The Prediction page is approved as a new screen
+under D14. Its data contract is `GET /v1/forecasts` (spec 003 section 10, D11 approved the
+same day; spec 002 D10 and AC-API-17 amended). In the Stage 1 public demo it is protected
+like the other pages (spec 014). D1 to D14 above are unchanged; D6 now reads "the menu
+shows only implemented screens", which adds Prediction as a fifth menu item.
+
+**Screen** (`/prediction`, menu item "Prediction", reference `DealDesign/prediction.png`,
+read-only and never committed; the layout and hierarchy follow it, in the DealPilot dark
+theme with tokens, CSS Modules and hand-drawn SVG charts, D12; no new dependency):
+- Filters: level (Total, Category, Product and region), category, product, region,
+  cutoff date (from dataset start + 6 to dataset end) and horizon (7, 14, 21 or 28 days).
+  "Generate Forecast" calls the API. The submitted settings live in the URL (D7). The
+  button is disabled while a forecast loads, so a second click sends nothing.
+- KPI cards: historical units (the 28 days up to the cutoff, with the change vs the 28
+  days before only when that window is fully inside the dataset and its sum is above 0),
+  forecasted units (the next N days, with the change vs the last N days before the cutoff
+  under the same condition), the horizon with its dates, and the served model.
+- Chart: actual units up to the cutoff (solid blue), the forecast after it (dashed
+  purple), a vertical cutoff marker; no confidence band and no actual value after the
+  cutoff.
+- Model details from the API answer and `/v1/dimensions`, with the note "Baseline
+  forecast. No prediction intervals."
+- Tabs: Forecast Table (Date, Day, Actual, Forecast, Difference, Abs. error, APE; an em
+  dash where no actual exists, `n/a` for APE when the actual is 0) and Model Evaluation.
+- No bell, avatar, user name, Settings or other control without a real function.
+
+**Model Evaluation data.** Only genuine harness output is shown, labelled "Exploratory
+backtest, not a formal evaluation": the 13-fold means (spec 003 section 7.5, open days) of
+seasonal naive and naive at each level, from one exploratory backtest of the seed 42 data
+(spec 003 section 9.5). It is stored as `frontend/src/evaluation/exploratory-backtest.json`,
+written by `python -m dealpilot.forecasting.summary <run folder> <file>` from a run of
+`python -m dealpilot.forecasting.evaluate backtest`, and checked by
+`backend/tests/test_forecasting_summary.py`, which runs a fresh exploratory backtest and
+requires the same numbers. No holdout result and no formal result is ever shown. Whether
+this small summary file may be committed (AGENTS.md: no generated data) is pending the
+product owner's decision; see the 2026-11-04 decision register entry.
+
+**Acceptance (tests in `frontend/tests/pages/prediction.test.tsx`).** The page starts with
+an empty state and no forecast request; Generate Forecast sends exactly the spec 003
+section 10 parameters of the level; KPIs, chart lines, cutoff marker, details and table
+equal values worked out from the fixture; loading, error, data-unavailable and cutoff
+validation states; no double submit; the evaluation tab shows the harness numbers with
+its label; no control without a function; public mode sends a visitor without a session
+to `/welcome`.

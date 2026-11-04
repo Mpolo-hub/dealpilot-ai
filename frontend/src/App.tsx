@@ -1,4 +1,5 @@
-// Routes of the first release (spec 007 section 5): four screens and "Page not found".
+// Routes of the first release (spec 007 section 5): four screens and "Page not found",
+// plus Prediction (spec 007 D14 amendment, 2026-11-04), protected like the others.
 // Stage 1 public demo (spec 014; A7-H1 D15-H1; Annex D, S1-D13 amended 2026-11-04):
 // - / and /welcome always show the Welcome page; the Dashboard is /dashboard (Annex D,
 //   2026-11-04); /login is public; /access redeems an invitation link;
@@ -18,6 +19,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { DataPage } from "./pages/DataPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { PredictionPage } from "./pages/PredictionPage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { SalesAnalysisPage } from "./pages/SalesAnalysisPage";
 import { WelcomePage } from "./pages/WelcomePage";
@@ -98,6 +100,7 @@ export function App() {
         <Route path="data" element={<DataPage />} />
         <Route path="analysis" element={<SalesAnalysisPage />} />
         <Route path="products" element={<ProductsPage />} />
+        <Route path="prediction" element={<PredictionPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

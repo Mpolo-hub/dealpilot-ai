@@ -434,6 +434,16 @@ def test_ac_s1_api_01_no_session_is_401(env) -> None:
         assert "seed" not in r.text
 
 
+def test_ac_s1_api_01_forecasts_need_a_session(env) -> None:
+    """/v1/forecasts (served since 2026-11-04) is protected like every /v1 route."""
+    client = make_client(env, Clock())
+    r = client.get("/v1/forecasts?level=total")
+    assert r.status_code == 401 and r.json()["error"]["code"] == "unauthorized"
+    assert "points" not in r.text
+    judge = signed_in(env, Clock())
+    assert judge.get("/v1/forecasts?level=total").status_code == 200
+
+
 def test_ac_s1_api_02_docs_are_off(env) -> None:
     client = make_client(env, Clock())
     for path in ("/docs", "/redoc", "/openapi.json"):

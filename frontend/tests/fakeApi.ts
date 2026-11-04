@@ -99,6 +99,39 @@ export function metrics(url: URL): Response {
   });
 }
 
+/** GET /v1/forecasts (spec 003 section 10): seasonal naive over the hand-made lines, with
+ * the weekly fallback for closed source days. Key parameters are not validated here. */
+export function forecasts(url: URL): Response {
+  const p = url.searchParams;
+  const level = p.get("level");
+  const cutoff = p.get("cutoff") ?? DATASET.end;
+  const horizon = Number(p.get("horizon") ?? "28");
+  if (!level) return error(422, "invalid_parameter");
+  const keep = (line: (typeof LINES)[number]) => (level === "total"
+    || (level === "category" && category(line[3]) === p.get("category"))
+    || (level === "product_region" && line[3] === p.get("product_id") && line[2] === p.get("region_id")))
+    && line[1] <= cutoff;
+  const units = new Map<string, number>();
+  for (const line of LINES.filter(keep)) units.set(line[1], (units.get(line[1]) ?? 0) + line[4]);
+  const shift = (iso: string, days: number) =>
+    new Date(Date.parse(`${iso}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
+  const closed = (iso: string) => ["12-25", "01-01"].includes(iso.slice(5));
+  const points = [];
+  for (let h = 1; h <= horizon; h += 1) {
+    let source = shift(cutoff, -6 + ((h - 1) % 7));
+    while (source >= DATASET.start && closed(source)) source = shift(source, -7);
+    points.push({ date: shift(cutoff, h), forecast: source >= DATASET.start ? units.get(source) ?? 0 : 0,
+      lower_80: null, upper_80: null });
+  }
+  const key = level === "category" ? { category: p.get("category") }
+    : level === "product_region" ? { product_id: p.get("product_id"), region_id: p.get("region_id") } : {};
+  return Response.json({
+    level, key, cutoff, horizon,
+    model: { name: "seasonal_naive", version: "1.0", settings: { lag_days: 7, closed_day_fallback: "weekly" } },
+    uses_planned_promotions: false, points,
+  });
+}
+
 export type Override = (url: URL) => Response | Promise<Response> | undefined;
 
 /** Replace `fetch` with the fake API; returns the list of requested paths (with query). */
@@ -113,6 +146,7 @@ export function installFakeApi(override?: Override): string[] {
     if (url.pathname === "/v1/metadata") return Response.json(METADATA);
     if (url.pathname === "/v1/dimensions") return Response.json(DIMENSIONS);
     if (url.pathname === "/v1/sales/metrics") return metrics(url);
+    if (url.pathname === "/v1/forecasts") return forecasts(url);
     return error(404, "not_found");
   }));
   return requested;

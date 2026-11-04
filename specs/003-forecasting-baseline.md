@@ -861,6 +861,11 @@ the implementation reads it, as approved at the implementation review:
   dated updates); a consumed holdout is never reset or made usable again.
 
 ## 10. `/v1/forecasts`: deferred proposal (D11, not approved, not in scope)
+
+**Update (2026-11-04).** D11 is approved (section 12.2) and the endpoint is served as
+below; the criteria AC-FC-API-01 to 05 are binding. The heading and the text below are
+kept as written; where they say "not approved" or "would", read "approved" and "does".
+Sessions protect it in the public demo like every `/v1` route (spec 014).
 Spec 002 D10 and AC-API-17 say `/v1/forecasts` returns 404 in v1. This spec does not
 change that and builds no endpoint. Spec 002 section 6 says "Spec 003 may change any of
 it", so the notes below refine that planned contract without editing spec 002. Serving it
@@ -986,7 +991,7 @@ line).
 | D30 | O2 closure record (2026-11-01). All six O2 gates are complete: plan (D27), implementation (D27, D28), dependency approval, installation (`pip check` clean), license (D29) and AC-FC-26 (56 passed, 0 failed, 0 skipped, 859 deselected) with `pygit2==1.20.1` and bundled `libgit2==1.9.7` verified at runtime. O2 is closed. D27, D28 and D29 stay as recorded, and the D29 license conditions remain applicable. The closure does not authorize any formal evaluation: a first Git commit and a verified clean working tree remain prerequisites (sections 9.5 and 13.3). | Approved 2026-11-01 by the user's explicit decision (official O2 closure). |
 | D31 | Implementation review of tranche 2 (D2 "exact options set at implementation review"). Approved choices: (1) the command line runs exploratory backtests and a read-only holdout status only; formal runs are Python calls; (2) `source_manifest` leaves out `__pycache__` and `*.egg-info` (section 9.3 clarification); (3) no run duration in `run.json` (console and `diagnostics` warning only); (4) `n_folds_*` columns on `mean` rows; (5) RelMAE for naive, informational only, never gated; (6) holdout MASE scale up to `H` (section 7.2 clarification); (7) one candidate per run, with the formal backtest pass recomputed from the hashed bytes and compared before any holdout forecast (section 9.4 clarification); (8) a backtest run creates its folder after scoring. No formula, threshold or gate rule changes. This approves no formal run. | Approved 2026-11-01 by the user's explicit decision; condition (7) set by the user. |
 | D5 | Replaced by D15 and D17. | Superseded |
-| D11 | Whether to serve `/v1/forecasts` (section 10), which also needs a spec 002 update. | Deferred |
+| D11 | Whether to serve `/v1/forecasts` (section 10), which also needs a spec 002 update. | Deferred. **Approved 2026-11-04** by the product owner's explicit decision: served exactly as section 10 (parameters, check order, response shape, interval bounds `null`); AC-FC-API-01 to 05 are binding; spec 002 D10 and AC-API-17 amended the same day. Implemented in `dealpilot.forecasting.serving` and `dealpilot.api.v1`, tested in `backend/tests/test_forecasting_api.py`. Seasonal naive is the served baseline; the section 8 gate does not apply to it. This approves no formal run. |
 
 ## 13. Questions
 

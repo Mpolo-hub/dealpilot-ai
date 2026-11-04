@@ -1,5 +1,6 @@
-// Application shell (spec 007 sections 5 and 9): sidebar with the four F1 screens only
-// (D6), a top bar with the menu button on small screens, and the page content.
+// Application shell (spec 007 sections 5 and 9): sidebar with the four F1 screens (D6) and
+// Prediction (D14 amendment, 2026-11-04), a top bar with the menu button on small
+// screens, and the page content.
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 
@@ -18,6 +19,7 @@ const NAV: { to: string; label: string; icon: IconName }[] = [
   { to: "/data", label: text.nav.data, icon: "data" },
   { to: "/analysis", label: text.nav.analysis, icon: "analysis" },
   { to: "/products", label: text.nav.products, icon: "products" },
+  { to: "/prediction", label: text.nav.prediction, icon: "trend" },
 ];
 
 export function AppShell() {

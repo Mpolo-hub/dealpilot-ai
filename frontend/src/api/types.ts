@@ -79,3 +79,33 @@ export interface MetricsQuery {
   category?: string[];
   region_id?: string[];
 }
+
+// GET /v1/forecasts (spec 003 section 10, served since 2026-11-04: spec 003 D11 approved,
+// spec 002 D10 amended). The served model is seasonal naive "1.0"; bounds are null.
+export type ForecastLevel = "total" | "category" | "product_region";
+
+export interface ForecastPoint {
+  date: IsoDate;
+  forecast: number;
+  lower_80: number | null;
+  upper_80: number | null;
+}
+
+export interface ForecastResponse {
+  level: ForecastLevel;
+  key: { category?: string; product_id?: string; region_id?: string };
+  cutoff: IsoDate;
+  horizon: number;
+  model: { name: string; version: string; settings: Record<string, string | number | boolean> };
+  uses_planned_promotions: boolean;
+  points: ForecastPoint[];
+}
+
+export interface ForecastQuery {
+  level: ForecastLevel;
+  category?: string;
+  product_id?: string;
+  region_id?: string;
+  cutoff: IsoDate;
+  horizon: number;
+}

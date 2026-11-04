@@ -188,3 +188,40 @@
   fill: rgba(3, 12, 26, 0.75);
   stroke: rgba(120, 190, 255, 0.12);
 }
+
+/* Prediction chart (spec 007 D14 amendment, 2026-11-04): actual solid blue, forecast
+   dashed purple, cutoff marker. */
+.actualLine {
+  fill: none;
+  stroke: var(--color-electric);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 2px var(--light-blue-soft));
+}
+
+.forecastLine {
+  fill: none;
+  stroke: var(--chart-6);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  stroke-linejoin: round;
+}
+
+.cutoff {
+  stroke: var(--color-cyan);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+}
+
+.cutoffLabel {
+  fill: var(--color-cyan-light);
+  font-size: 11px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.forecastDot {
+  fill: var(--chart-6);
+  stroke: #fff;
+  stroke-width: 2;
+}

@@ -366,7 +366,8 @@ describe("product rules across pages", () => {
       await waitFor(() => expect(screen.queryAllByRole("status").length).toBe(0));
       const nav = screen.getByRole("navigation", { name: text.app.mainNavigation });
       expect(within(nav).getAllByRole("link").map((a) => a.textContent))
-        .toEqual(["Dashboard", "Data", "Analysis", "Products"]);
+        // Prediction joined the menu with the spec 007 D14 amendment (2026-11-04).
+        .toEqual(["Dashboard", "Data", "Analysis", "Products", "Prediction"]);
       const controls = [...screen.queryAllByRole("button"), ...screen.queryAllByRole("link")]
         .map((e) => e.textContent ?? "");
       for (const label of controls) {
