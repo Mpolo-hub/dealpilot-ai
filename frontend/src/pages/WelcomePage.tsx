@@ -4,11 +4,13 @@
 import { Link } from "react-router";
 
 import { DemoNotice } from "../components/ui";
+import { dashboardPath } from "../demo";
 import { Icon } from "../components/Icons";
 import { text } from "../text/en";
 import styles from "./PublicPages.module.css";
 
-export function WelcomePage() {
+/** signedIn: a session is active, so the main button opens the Dashboard directly. */
+export function WelcomePage({ signedIn = false }: { signedIn?: boolean }) {
   const t = text.welcome;
   return (
     <div className={styles.page}>
@@ -40,7 +42,7 @@ export function WelcomePage() {
           </ul>
         </section>
         <section className={styles.ctaPanel} aria-label={t.cta}>
-          <Link to="/login" className={styles.primaryButton}>
+          <Link to={signedIn ? dashboardPath() : "/login"} className={styles.primaryButton}>
             {t.cta} <span aria-hidden="true">→</span>
           </Link>
           <p className={styles.secure}><Icon name="info" size={14} /> {t.secure}</p>

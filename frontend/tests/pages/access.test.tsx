@@ -32,7 +32,7 @@ describe("access page S1-a (JA-FR-05)", () => {
     installFakeApi((url) => url.pathname === "/access/redeem" ? new Response(null, { status: 204 }) : undefined);
     renderAt("/access");
     await screen.findByRole("heading", { name: text.dashboard.title, level: 1 });
-    expect(currentLocation).toBe("/");
+    expect(currentLocation).toBe("/dashboard");
     expect(window.location.hash).toBe("");
     const [path, init] = fetchCalls().find(([p]) => p === "/access/redeem")!;
     expect(path).toBe("/access/redeem");
@@ -117,7 +117,7 @@ describe("expired session and sign-out (S1-b and S1-c, amended by spec 014 Annex
   it("AC-S1-UI-03 (amended): sign-out calls /access/logout, then goes to /welcome", async () => {
     publicMode();
     installFakeApi((url) => url.pathname === "/access/logout" ? new Response(null, { status: 204 }) : undefined);
-    renderAt("/");
+    renderAt("/dashboard");
     await screen.findByRole("heading", { name: text.dashboard.title, level: 1 });
     await userEvent.click(screen.getByRole("button", { name: text.access.signOut }));
     await screen.findByRole("heading", { name: text.welcome.title, level: 1 });
@@ -169,7 +169,7 @@ describe("rate limit and unavailable data", () => {
     publicMode();
     installFakeApi((url) => url.searchParams.get("group_by") === "region"
       ? errorResponse(429, "rate_limited", "slow down") : undefined);
-    renderAt("/");
+    renderAt("/dashboard");
     const regions = await screen.findByRole("region", { name: text.dashboard.salesByRegion });
     await within(regions).findByText(text.errors.rateLimited);
     const sales = await screen.findByRole("region", { name: text.dashboard.totalSales });
@@ -182,7 +182,7 @@ describe("rate limit and unavailable data", () => {
       publicMode();
       installFakeApi((url) => url.pathname === "/v1/dimensions"
         ? errorResponse(503, code, "D:\\DealPilot AI\\data\\raw is missing") : undefined);
-      const view = renderAt("/");
+      const view = renderAt("/dashboard");
       await screen.findByRole("heading", { name: text.errors.dataUnavailableTitle });
       expect(screen.getByText(text.errors.demoDataUnavailable)).toBeTruthy();
       expect(screen.queryByText(text.errors.dataUnavailableHelp)).toBeNull();

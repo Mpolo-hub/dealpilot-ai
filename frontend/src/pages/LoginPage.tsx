@@ -8,6 +8,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 
 import { accessFailure, extractCode, redeemInvitation, type AccessFailure } from "../api/access";
 import { DemoNotice } from "../components/ui";
+import { dashboardPath } from "../demo";
 import { Icon } from "../components/Icons";
 import { text } from "../text/en";
 import styles from "./PublicPages.module.css";
@@ -42,7 +43,7 @@ export function LoginPage() {
     redeemInvitation(code).then(
       () => {
         setValue("");
-        navigate("/", { replace: true });
+        navigate(dashboardPath(), { replace: true });
       },
       (error: unknown) => setStatus(accessFailure(error)),
     );

@@ -6,7 +6,7 @@ import { NavLink, Outlet, useLocation } from "react-router";
 import { postJson } from "../api/client";
 import { ACCESS_LOGOUT } from "../api/endpoints";
 import { notifySignedOut } from "../api/session";
-import { isPublicDemo } from "../demo";
+import { dashboardPath, isPublicDemo } from "../demo";
 import { text } from "../text/en";
 import styles from "./AppShell.module.css";
 import { ErrorBoundary } from "./ErrorBoundary";
@@ -48,9 +48,9 @@ export function AppShell() {
         </div>
         <nav aria-label={text.app.mainNavigation} id="main-navigation">
           <ul className={styles.navList}>
-            {NAV.map((item) => (
+            {NAV.map((entry) => (entry.to === "/" ? { ...entry, to: dashboardPath() } : entry)).map((item) => (
               <li key={item.to}>
-                <NavLink to={item.to} end={item.to === "/"} title={item.label}
+                <NavLink to={item.to} end={item.to === dashboardPath()} title={item.label}
                   className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ""}`}>
                   <Icon name={item.icon} />
                   <span className={styles.navLabel}>{item.label}</span>

@@ -1,6 +1,6 @@
 // Welcome (/welcome) and invitation Login (/login) pages: spec 014 Annex D, S1-D13 amended
 // 2026-11-04. Public demo mode is set with vi.stubEnv; local mode must stay unchanged.
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -69,7 +69,7 @@ describe("Login page", () => {
     renderAt("/login");
     await typeAndSubmit(CODE);
     await screen.findByRole("heading", { name: text.dashboard.title, level: 1 });
-    expect(currentLocation).toBe("/");
+    expect(currentLocation).toBe("/dashboard");
     expect(redeemBodies()).toEqual([{ token: CODE }]);
   });
 
@@ -147,12 +147,12 @@ describe("Login page", () => {
     installFakeApi();
     renderAt("/login");
     await screen.findByRole("heading", { name: text.dashboard.title, level: 1 });
-    expect(currentLocation).toBe("/");
+    expect(currentLocation).toBe("/dashboard");
   });
 });
 
 describe("routing without a session", () => {
-  it.each(["/", "/analysis", "/products", "/data"])(
+  it.each(["/dashboard", "/analysis", "/products", "/data"])(
     "a visitor without a session who opens %s goes to /welcome",
     async (path) => {
       publicMode();
@@ -172,5 +172,57 @@ describe("routing without a session", () => {
       await screen.findByRole("heading", { name: text.notFound.title });
       view.unmount();
     }
+  });
+});
+
+describe("site root in public mode (Annex D, 2026-11-04)", () => {
+  it("/ always shows the Welcome page, even with a valid session; its button opens /dashboard", async () => {
+    publicMode();
+    installFakeApi();                                   // the session is valid
+    renderAt("/");
+    await screen.findByRole("heading", { name: text.welcome.title, level: 1 });
+    expect(currentLocation).toBe("/");
+    const cta = await screen.findByRole("link", { name: new RegExp(text.welcome.cta) });
+    await waitFor(() => expect(cta.getAttribute("href")).toBe("/dashboard"));
+    await userEvent.click(cta);
+    await screen.findByRole("heading", { name: text.dashboard.title, level: 1 });
+    expect(currentLocation).toBe("/dashboard");
+  });
+
+  it("/ without a session shows Welcome; its button opens /login", async () => {
+    publicMode();
+    signedOutApi(() => new Response(null, { status: 204 }));
+    renderAt("/");
+    await screen.findByRole("heading", { name: text.welcome.title, level: 1 });
+    const cta = screen.getByRole("link", { name: new RegExp(text.welcome.cta) });
+    await waitFor(() => expect(cta.getAttribute("href")).toBe("/login"));
+    expect(currentLocation).toBe("/");
+  });
+
+  it("the Dashboard navigation entry points to /dashboard in public mode", async () => {
+    publicMode();
+    installFakeApi();
+    renderAt("/analysis");
+    const nav = await screen.findByRole("navigation", { name: text.app.mainNavigation });
+    expect(within(nav).getByRole("link", { name: text.nav.dashboard }).getAttribute("href")).toBe("/dashboard");
+  });
+
+  it("the invitation link /access lands on /dashboard", async () => {
+    publicMode();
+    signedOutApi(() => new Response(null, { status: 204 }));
+    window.history.replaceState(null, "", "/access#abcdefghijklmnopqrstuvwxyz0123456789ABCD");
+    renderAt("/access");
+    await screen.findByRole("heading", { name: text.dashboard.title, level: 1 });
+    expect(currentLocation).toBe("/dashboard");
+    window.history.replaceState(null, "", "/");
+  });
+
+  it("local mode keeps the Dashboard at / with its navigation entry at /", async () => {
+    installFakeApi();
+    renderAt("/");
+    await screen.findByRole("heading", { name: text.dashboard.title, level: 1 });
+    const nav = screen.getByRole("navigation", { name: text.app.mainNavigation });
+    expect(within(nav).getByRole("link", { name: text.nav.dashboard }).getAttribute("href")).toBe("/");
+    expect(currentLocation).toBe("/");
   });
 });

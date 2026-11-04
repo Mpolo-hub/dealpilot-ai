@@ -1,6 +1,7 @@
 // Routes of the first release (spec 007 section 5): four screens and "Page not found".
 // Stage 1 public demo (spec 014; A7-H1 D15-H1; Annex D, S1-D13 amended 2026-11-04):
-// - /welcome and /login are public; /access redeems an invitation link;
+// - / and /welcome always show the Welcome page; the Dashboard is /dashboard (Annex D,
+//   2026-11-04); /login is public; /access redeems an invitation link;
 // - without a session, the protected pages go to /welcome; an expired session goes to
 //   /login with a message; sign-out goes to /welcome.
 // The server stays the control: every /v1 request without a session gets 401.
@@ -10,7 +11,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 import { METADATA } from "./api/endpoints";
 import { onSessionEnded, onSignedIn, onSignedOut } from "./api/session";
 import { AppShell } from "./components/AppShell";
-import { isPublicDemo } from "./demo";
+import { dashboardPath, isPublicDemo } from "./demo";
 import { clearApiCache } from "./hooks/useApi";
 import { AccessPage } from "./pages/AccessPages";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -85,12 +86,15 @@ export function App() {
   return (
     <Routes>
       {publicDemo && <Route path="access" element={<AccessPage />} />}
-      {publicDemo && <Route path="welcome" element={<WelcomePage />} />}
+      {publicDemo && <Route index element={<WelcomePage signedIn={auth === "in"} />} />}
+      {publicDemo && <Route path="welcome" element={<WelcomePage signedIn={auth === "in"} />} />}
       {publicDemo && (
-        <Route path="login" element={auth === "in" ? <Navigate to="/" replace /> : <LoginPage />} />
+        <Route path="login" element={auth === "in" ? <Navigate to={dashboardPath()} replace /> : <LoginPage />} />
       )}
       <Route element={shell}>
-        <Route index element={<DashboardPage />} />
+        {publicDemo
+          ? <Route path="dashboard" element={<DashboardPage />} />
+          : <Route index element={<DashboardPage />} />}
         <Route path="data" element={<DataPage />} />
         <Route path="analysis" element={<SalesAnalysisPage />} />
         <Route path="products" element={<ProductsPage />} />

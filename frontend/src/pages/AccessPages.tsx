@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import { redeemInvitation } from "../api/access";
 import { isRateLimited } from "../api/errors";
 import { DemoNotice } from "../components/ui";
+import { dashboardPath } from "../demo";
 import uiStyles from "../components/ui.module.css";
 import { text } from "../text/en";
 import styles from "./AccessPages.module.css";
@@ -44,7 +45,7 @@ export function AccessPage() {
     }
     if (!token) return;
     redeemInvitation(token).then(
-      () => navigate("/", { replace: true }),
+      () => navigate(dashboardPath(), { replace: true }),
       (error: unknown) => setStatus(isRateLimited(error) ? "rateLimited" : "failed"),
     );
   }, [navigate, token]);

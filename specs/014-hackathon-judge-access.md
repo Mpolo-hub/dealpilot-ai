@@ -905,3 +905,17 @@ backend contract (JA-FR-05 to JA-FR-11, JA-SR-01 to JA-SR-08) is unchanged.
   - AC-S1-UI-03 now reads: "sign-out calls /access/logout, then goes to /welcome".
   - The S1-b signed-out page is replaced by these redirects.
   - New tests are in `frontend/tests/pages/publicpages.test.tsx`.
+
+### Annex D update, 2026-11-04: Welcome at the site root (product owner decision)
+
+- **In public mode, `/` always shows the Welcome page first**, even when the visitor already
+  has a valid session. `/welcome` shows the same page.
+- **The Dashboard moves to `/dashboard`** in public mode. The navigation entry, the
+  redirect after login, the `/access` link flow, the "already signed in" redirect from
+  `/login` and the "Page not found" link all go to `/dashboard`.
+- **On Welcome**, the main button opens `/dashboard` when a session is active, and `/login`
+  otherwise.
+- **Without a session**, the protected pages (`/dashboard`, `/analysis`, `/products`,
+  `/data`) still go to `/welcome`.
+- **Local mode is unchanged:** the Dashboard stays at `/`.
+- No backend auth or security code changes.
